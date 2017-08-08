@@ -124,8 +124,6 @@ static void validate (const utf_enc_t enc, bint bswp_in, bint bswp_out
 
   bint eof = false;
 
-  if (bswp_in && bswp_out) bswp_out = false;
-
   if (bom_off != 0) buf_copy (in, bom_buf, bom_off);
 
   while (true)
