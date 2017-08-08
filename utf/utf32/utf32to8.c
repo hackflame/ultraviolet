@@ -104,7 +104,7 @@ recover:
     // Find out which UTF-32 characters transform into 4-byte UTF-8 sequences
     xi128 x4 = _mm_cmpgt_epi32 (xv, _mm_set1_epi32 ((0x10000 - 1) ^ 0x80000000));
 
-    // Check if this vector contains only 3-byte UTF-8 sequences
+    // Check if this vector doesn't contain any 4-byte UTF-8 sequences
     if (likely (_mm_movemask_epi8 (x4) == 0))
     {
       // Create the expansion vector
@@ -183,6 +183,10 @@ recover:
 
         o += oa;
       #endif
+
+      i += 4;
+
+      continue;
     }
 
     #if T(VALID)
