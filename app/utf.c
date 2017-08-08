@@ -519,6 +519,8 @@ error_help:
       goto error_help;
     }
     else goto error_args;
+
+    argv++;
   }
 
   // Check for incorrect `bom_keep` usage
