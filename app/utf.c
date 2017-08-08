@@ -359,31 +359,31 @@ error_help:
 "    at the byte order mark (BOM), if it's present.\n"
 "    Assume UTF-8 if it's not present.\n"
 "\n"
-"    utf-8: the input is encoded in UTF-8.\n"
-"    utf-16: the input is encoded in UTF-16 (host endianness).\n"
+"    utf-8:    the input is encoded in UTF-8.\n"
+"    utf-16:   the input is encoded in UTF-16 (host endianness).\n"
 "    utf-16le: the input is encoded in UTF-16 (little-endian).\n"
 "    utf-16be: the input is encoded in UTF-16 (big-endian).\n"
-"    utf-32: the input us encoded in UTF-32 (host endianness).\n"
+"    utf-32:   the input is encoded in UTF-32 (host endianness).\n"
 "    utf-32le: the input is encoded in UTF-32 (little-endian).\n"
 "    utf-32be: the input is encoded in UTF-32 (big-endian).\n"
 "\n"
 "-out: output encoding (optional).\n"
 "\n"
-"    none: validate the input only.\n"
-"    utf-8: encode the output in UTF-8.\n"
-"    utf-16: encode the output in UTF-16 (host endianness).\n"
+"    none:     validate the input only.\n"
+"    utf-8:    encode the output in UTF-8.\n"
+"    utf-16:   encode the output in UTF-16 (host endianness).\n"
 "    utf-16le: encode the output in UTF-16 (little-endian).\n"
 "    utf-16be: encode the output in UTF-16 (big-endian).\n"
-"    utf-32: encode the output in UTF-32 (host endianness).\n"
+"    utf-32:   encode the output in UTF-32 (host endianness).\n"
 "    utf-32le: encode the output in UTF-32 (little-endian).\n"
 "    utf-32be: encode the output in UTF-32 (big-endian).\n"
 "\n"
 "-bom: byte order mark policy (optional).\n"
 "\n"
 "    auto: omit BOM for UTF-8 output, write otherwise.\n"
-"    keep: write BOM in the output if it was present in the input.\n"
-"    yes: always write BOM.\n"
-"    no: always omit BOM.\n"
+"    keep: write BOM in the output if it was present in the input (UTF-8 only).\n"
+"    yes:  force writing of BOM.\n"
+"    no:   discard BOM.\n"
     );
 
     return help ? EXIT_SUCCESS : EXIT_FAILURE;
@@ -521,6 +521,9 @@ error_help:
     else goto error_args;
   }
 
+  // Check for incorrect `bom_keep` usage
+  if ((out != 0) && (out != utf8) && (bom == bom_keep)) goto error_args;
+
 #if OS(WIN32)
   // Put both streams into binary mode
   if (fflush (stdin) == EOF) error_io();
@@ -581,9 +584,8 @@ bom_absent:
 
         // Write the BOM
         if ((out != utf8) && (bom == bom_auto)) bom = bom_yes;
-
 #if 0
-        elif (bom == bom_keep) bom = bom_no;
+        elif ((out == utf8) && (bom == bom_keep)) bom = bom_no;
 #endif
 
         if (bom == bom_yes) mark (out, (out == utf8) ? false : bswp_out);
@@ -611,23 +613,14 @@ bom_absent:
     elif (*(u16*)buf == utf16_bom)
     {
       in = utf16;
-
-      if (out != 0)
-      {
-        if (bom == bom_keep) bom = bom_yes;
-        goto bom_present;
-      }
+      if (out != 0) goto bom_detected;
     }
     elif (bswap16 (*(u16*)buf) == utf16_bom)
     {
       in = utf16;
       bswp_in = true;
 
-      if (out != 0)
-      {
-        if (bom == bom_keep) bom = bom_yes;
-        goto bom_present;
-      }
+      if (out != 0) goto bom_detected;
     }
 
     // Try UTF-8
@@ -645,8 +638,8 @@ bom_absent:
 
         if (out != 0)
         {
-          if (bom == bom_keep) bom = bom_yes;
-          goto bom_present;
+          if ((out == utf8) && (bom == bom_keep)) bom = bom_yes;
+          goto bom_detected;
         }
       }
 
@@ -662,23 +655,14 @@ bom_absent:
         if (*(u32*)buf == utf32_bom)
         {
           in = utf32;
-
-          if (out != 0)
-          {
-            if (bom == bom_keep) bom = bom_yes;
-            goto bom_present;
-          }
+          if (out != 0) goto bom_detected;
         }
         else if (bswap32 (*(u32*)buf) == utf32_bom)
         {
           in = utf32;
           bswp_in = true;
 
-          if (out != 0)
-          {
-            if (bom == bom_keep) bom = bom_yes;
-            goto bom_present;
-          }
+          if (out != 0) goto bom_detected;
         }
 
         goto bom_absent;
@@ -687,10 +671,9 @@ bom_absent:
   }
   else if (out != 0)
   {
-    // Write the BOM
+bom_detected:
+    // Write the output BOM
     if ((out != utf8) && (bom == bom_auto)) bom = bom_yes;
-
-bom_present:
     if (bom == bom_yes) mark (out, (out == utf8) ? false : bswp_out);
   }
 
