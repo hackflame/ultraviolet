@@ -116,6 +116,7 @@ recover:
     xsh = _mm_add_epi8 (xsh, _mm_slli_si128 (xsh, 1));
     xsh = _mm_add_epi8 (xsh, _mm_slli_si128 (xsh, 2));
     xsh = _mm_add_epi8 (xsh, _mm_slli_si128 (xsh, 4));
+    xsh = _mm_add_epi8 (xsh, _mm_slli_si128 (xsh, 8));
     xsh = _mm_and_si128 (xsh, _mm_cmplt_epi8 (xt, _mm_set1_epi8 (2)));
 
     // Get the number of input and output bytes to advance
