@@ -84,7 +84,9 @@ typedef enum utf_conv_e
 // Globals
 // -----------------------------------------------------------------------------
 
-static size_t processed;
+static u8 bom_buf[4];
+static size_t bom_off;
+static bool bom_eof;
 
 // =============================================================================
 // Functions
@@ -117,12 +119,14 @@ static void validate (const utf_enc_t enc, bint bswp_in, bint bswp_out
 {
   u8 in[BUF_SIZE];
 
-  size_t num = processed;
-  size_t off = 0;
+  size_t num = 0;
+  size_t off = bom_off;
 
   bint eof = false;
 
   if (bswp_in && bswp_out) bswp_out = false;
+
+  if (bom_off != 0) buf_copy (in, bom_buf, bom_off);
 
   while (true)
   {
@@ -132,7 +136,7 @@ static void validate (const utf_enc_t enc, bint bswp_in, bint bswp_out
     if (insz != size)
     {
       if (!feof (stdin)) error_io();
-      if (insz == 0) goto done;
+      if ((insz == 0) && !bom_eof) goto done;
       eof = true;
     }
 
@@ -188,10 +192,12 @@ static void convert (const utf_conv_t conv, bint bswp_in, bint bswp_out)
   u8 in[BUF_SIZE];
   u8 out[BUF_SIZE];
 
-  size_t num = processed;
-  size_t off = 0;
+  size_t num = 0;
+  size_t off = bom_off;
 
   bint eof = false;
+
+  if (bom_off != 0) buf_copy (in, bom_buf, bom_off);
 
   while (true)
   {
@@ -201,7 +207,7 @@ static void convert (const utf_conv_t conv, bint bswp_in, bint bswp_out)
     if (insz != size)
     {
       if (!feof (stdin)) error_io();
-      if (insz == 0) goto done;
+      if ((insz == 0) && !bom_eof) goto done;
       eof = true;
     }
 
@@ -538,148 +544,97 @@ error_help:
   // Detect the input encoding
   if (in == 0)
   {
-    // Assume UTF-8 without BOM
-    in = utf8;
+    size_t num = fread (bom_buf, 1u, 4u, stdin);
 
-    u8 buf[8 + 32];
-    size_t n;
-
-    size_t num = fread (buf, 1u, 2u, stdin);
-
-    if (num != 2u)
+    if (num != 4u)
     {
-      int ret;
-      u8* ptr;
-
-fallback:
       if (!feof (stdin)) error_io();
-
-bom_absent:
-      processed = num;
-
-      // Validate as UTF-8
-      ret = utf8_str_valid (buf, num, &ptr, &n);
-
-      if (ret < 0)
-      {
-        if (feof (stdin) || (ret == INT_MIN)) error_input ((size_t)(ptr - buf));
-
-        // Read the number of expected bytes
-        ret = -ret;
-        n = fread (buf + num, 1u, (size_t)ret, stdin);
-
-        if (n != (size_t)ret)
-        {
-          if (!feof (stdin)) error_io();
-          error_input ((size_t)(ptr - buf));
-        }
-
-        num += n;
-
-        goto bom_absent;
-      }
-
-      // Convert from UTF-8
-      if (out != 0)
-      {
-        size_t size;
-
-        // Write the BOM
-        if ((out != utf8) && (bom == bom_auto)) bom = bom_yes;
-#if 0
-        elif ((out == utf8) && (bom == bom_keep)) bom = bom_no;
-#endif
-
-        if (bom == bom_yes) mark (out, (out == utf8) ? false : bswp_out);
-
-        if (out == utf8)
-        {
-          if (fwrite (buf, 1u, num, stdout) != num) error_io();
-        }
-        elif (out == utf16)
-        {
-          if (utf8_str_to16 (buf, num, (u16*)(buf + 8), 16u, &ptr, &size) != 0) error_input ((size_t)(ptr - buf));
-          if (fwrite ((u16*)(buf + 8), 2u, size, stdout) != size) error_io();
-        }
-        elif (out == utf32)
-        {
-          if (utf8_str_to32 (buf, num, (u32*)(buf + 8), 8u, &ptr, &size) != 0) error_input ((size_t)(ptr - buf));
-          if (fwrite ((u32*)(buf + 8), 4u, size, stdout) != size) error_io();
-        }
-      }
-
-      if (feof (stdin)) goto done;
+      bom_eof = true;
     }
 
-    // Try UTF-16
-    elif (*(u16*)buf == utf16_bom)
+    switch (num)
     {
-      in = utf16;
-      if (out != 0) goto bom_detected;
-    }
-    elif (bswap16 (*(u16*)buf) == utf16_bom)
-    {
-      in = utf16;
-      bswp_in = true;
-
-      if (out != 0) goto bom_detected;
-    }
-
-    // Try UTF-8
-    else
-    {
-      n = fread (buf + num, 1u, 1u, stdin);
-
-      if (n == 0) goto fallback;
-
-      num += n;
-
-      if (buf_equal (buf, utf8_bom, 3u))
-      {
-        in = utf8;
-
-        if (out != 0)
-        {
-          if ((out == utf8) && (bom == bom_keep)) bom = bom_yes;
-          goto bom_detected;
-        }
-      }
-
       // Try UTF-32
-      else
+      case 4:
       {
-        n = fread (buf + num, 1u, 1u, stdin);
-
-        if (n == 0) goto fallback;
-
-        num += n;
-
-        if (*(u32*)buf == utf32_bom)
-        {
-          in = utf32;
-          if (out != 0) goto bom_detected;
-        }
-        else if (bswap32 (*(u32*)buf) == utf32_bom)
+        if (*(u32*)bom_buf == utf32_bom) in = utf32;
+        elif (bswap32 (*(u32*)bom_buf) == utf32_bom)
         {
           in = utf32;
           bswp_in = true;
-
-          if (out != 0) goto bom_detected;
         }
+        else goto try_utf8;
 
-        goto bom_absent;
+        break;
+      }
+      // Try UTF-8
+      case 3:
+      {
+try_utf8:
+        if (buf_equal (bom_buf, utf8_bom, 3u))
+        {
+          in = utf8;
+
+          if (num != 3u)
+          {
+            bom_off = 1u;
+            buf_move (bom_buf, bom_buf + 3, 1u);
+          }
+
+          if ((out == utf8) && (bom == bom_keep)) bom = bom_yes;
+        }
+        else goto try_utf16;
+
+        break;
+      }
+      // Try UTF-16
+      case 2:
+      {
+try_utf16:
+        if (*(u16*)bom_buf == utf16_bom)
+        {
+          in = utf16;
+
+          if (num != 2u)
+          {
+            bom_off = num - 2u;
+            buf_move (bom_buf, bom_buf + 2, bom_off);
+          }
+        }
+        elif (bswap16 (*(u16*)bom_buf) == utf16_bom)
+        {
+          in = utf16;
+          bswp_in = true;
+
+          if (num != 2u)
+          {
+            bom_off = num - 2u;
+            buf_move (bom_buf, bom_buf + 2, bom_off);
+          }
+        }
+        else goto assume_utf8;
+
+        break;
+      }
+      // Assume UTF-8
+      case 1:
+      case 0:
+      {
+assume_utf8:
+        in = utf8;
+        bom_off = num;
       }
     }
   }
-  else if (out != 0)
+
+  // Write the output BOM
+  if (out != 0)
   {
-bom_detected:
-    // Write the output BOM
     if ((out != utf8) && (bom == bom_auto)) bom = bom_yes;
     if (bom == bom_yes) mark (out, (out == utf8) ? false : bswp_out);
   }
 
-  // Validate only
+  // Validate only?
   bint copy = false;
 
   if (in == out)
