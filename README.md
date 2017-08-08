@@ -72,7 +72,7 @@ The term `ubyte` refers to the most basic unit of the particular UTF encoding:
 
 The rest of UTF conversion functions follow the same interface.
 
-Read the fully commented [utf.h](https://github.com/garnetius/ultraviolet/utf/utf.h)
+Read the fully commented [utf.h](https://github.com/garnetius/ultraviolet/blob/master/utf/utf.h)
 header to see what else is there for you to play with.
 
 ## SIMD
