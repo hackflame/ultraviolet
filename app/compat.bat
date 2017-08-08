@@ -26,7 +26,6 @@ if not exist build (
 
 :: C++ compatibility test
 
-gcc -mconsole %MARCH% ^
-  -I%QUANTUM% -I%ULTRAVIOLET% ^
+gcc %MARCH% -I%QUANTUM% -I%ULTRAVIOLET% ^
   -c compat.cpp -o build\compat.o 2> build\compat.log
 if %ERRORLEVEL% neq 0 (echo "Build error: compat.cpp" && exit /b %ERRORLEVEL%)
