@@ -345,6 +345,8 @@ extern size_t utf32_stri_length (const u32* str);
 // -----------------------------------------------------------------------------
 // Validation and number of codepoints in a UTF string
 // -----------------------------------------------------------------------------
+// UTF-8
+// -----------------------------------------------------------------------------
 
 extern int utf8_str_valid (const u8* in, size_t len, u8** end, size_t* num);
 extern int utf8_str_runes (const u8* in, size_t len, u8** end, size_t* num);
@@ -354,6 +356,8 @@ extern int utf8_str_runes (const u8* in, size_t len, u8** end, size_t* num);
 extern int utf8_stri_valid (const u8* in, u8** end, size_t* num);
 extern int utf8_stri_runes (const u8* in, u8** end, size_t* num);
 
+// -----------------------------------------------------------------------------
+// UTF-16
 // -----------------------------------------------------------------------------
 
 extern int utf16_str_valid (const u16* in, size_t len, u16** end, size_t* num);
@@ -365,6 +369,8 @@ extern int utf16_stri_valid (const u16* in, u16** end, size_t* num);
 extern int utf16_stri_runes (const u16* in, u16** end, size_t* num);
 
 // -----------------------------------------------------------------------------
+// UTF-32
+// -----------------------------------------------------------------------------
 
 extern int utf32_str_valid (const u32* in, size_t len, u32** end);
 extern int utf32_stri_valid (const u32* in, u32** end);
@@ -372,7 +378,7 @@ extern int utf32_stri_valid (const u32* in, u32** end);
 // -----------------------------------------------------------------------------
 // Conversion
 // -----------------------------------------------------------------------------
-// UTF-8 to UTF-16 conversion
+// UTF-8 to UTF-16
 // -----------------------------------------------------------------------------
 
 extern int utf8_str_to16 (const u8* restrict in, size_t len, u16* restrict out
@@ -388,7 +394,7 @@ extern int utf8_stri_to16_fast (const u8* restrict in, u16* restrict out
 , size_t size, u8** end, size_t* num);
 
 // -----------------------------------------------------------------------------
-// UTF-8 to UTF-32 conversion
+// UTF-8 to UTF-32
 // -----------------------------------------------------------------------------
 
 extern int utf8_str_to32 (const u8* restrict in, size_t len, u32* restrict out
@@ -404,7 +410,7 @@ extern int utf8_stri_to32_fast (const u8* restrict in, u32* restrict out
 , size_t size, u8** end, size_t* num);
 
 // -----------------------------------------------------------------------------
-// UTF-16 to UTF-8 conversion
+// UTF-16 to UTF-8
 // -----------------------------------------------------------------------------
 
 extern int utf16_str_to8 (const u16* restrict in, size_t len, u8* restrict out
@@ -420,7 +426,7 @@ extern int utf16_stri_to8_fast (const u16* restrict in, u8* restrict out
 , size_t size, u16** end, size_t* num);
 
 // -----------------------------------------------------------------------------
-// UTF-16 to UTF-32 conversion
+// UTF-16 to UTF-32
 // -----------------------------------------------------------------------------
 
 extern int utf16_str_to32 (const u16* restrict in, size_t len, u32* restrict out
@@ -436,7 +442,7 @@ extern int utf16_stri_to32_fast (const u16* restrict in, u32* restrict out
 , size_t size, u16** end, size_t* num);
 
 // -----------------------------------------------------------------------------
-// UTF-32 to UTF-8 conversion
+// UTF-32 to UTF-8
 // -----------------------------------------------------------------------------
 
 extern int utf32_str_to8 (const u32* restrict in, size_t len, u8* restrict out
@@ -452,7 +458,7 @@ extern int utf32_stri_to8_fast (const u32* restrict in, u8* restrict out
 , size_t size, u32** end, size_t* num);
 
 // -----------------------------------------------------------------------------
-// UTF-32 to UTF-16 conversion
+// UTF-32 to UTF-16
 // -----------------------------------------------------------------------------
 
 extern int utf32_str_to16 (const u32* restrict in, size_t len, u16* restrict out
