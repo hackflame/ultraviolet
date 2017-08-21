@@ -67,6 +67,11 @@ recover:
     // Get the input vector
     xi128 xi = _mm_loadu_si128 ((const xi128*)i);
 
+  #if !T(EXPLICIT)
+    // Catch the terminating null character
+    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi8 (xi, _mm_setzero_si128())) != 0)) goto scalar;
+  #endif
+
     // Check if the input vector consists only of ASCII characters
     uint ao = _mm_movemask_epi8 (xi);
 

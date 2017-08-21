@@ -58,6 +58,11 @@ recover:
     // Get the input vector
     xi128 xi = _mm_loadu_si128 ((const xi128*)i);
 
+  #if !T(EXPLICIT)
+    // Catch the terminating null character
+    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi16 (xi, _mm_setzero_si128())) != 0)) goto scalar;
+  #endif
+
     // Adjust the input vector for signed comparison
     xi128 xv = _mm_xor_si128 (xi, _mm_set1_epi16 (0x8000));
 

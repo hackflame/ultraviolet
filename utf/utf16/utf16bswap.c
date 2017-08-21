@@ -46,7 +46,7 @@ if (true)
 
   #if !T(EXPLICIT)
     // Check for null-terminating character
-    if (likely (_mm_movemask_epi8 (_mm_cmpeq_epi16 (xs, _mm_setzero_si128())) != 0)) break;
+    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi16 (xs, _mm_setzero_si128())) != 0)) break;
   #endif
 
     // Change the endianness and store the result vector back
