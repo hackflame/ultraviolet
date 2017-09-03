@@ -114,15 +114,15 @@ static noreturn void error_unknown (void)
 
 // -----------------------------------------------------------------------------
 // Validate the input
-static void validate (const utf_enc_t enc, bint bswp_in, bint bswp_out
-, const bint copy)
+static void validate (const utf_enc_t enc, bool bswp_in, bool bswp_out
+, const bool copy)
 {
   u8 in[BUF_SIZE];
 
   size_t num = 0;
   size_t off = bom_off;
 
-  bint eof = false;
+  bool eof = false;
 
   if (bom_off != 0) buf_copy (in, bom_buf, bom_off);
 
@@ -185,7 +185,7 @@ done:
 
 // -----------------------------------------------------------------------------
 // Convert to another UTF encoding validating the input
-static void convert (const utf_conv_t conv, bint bswp_in, bint bswp_out)
+static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
 {
   u8 in[BUF_SIZE];
   u8 out[BUF_SIZE];
@@ -193,7 +193,7 @@ static void convert (const utf_conv_t conv, bint bswp_in, bint bswp_out)
   size_t num = 0;
   size_t off = bom_off;
 
-  bint eof = false;
+  bool eof = false;
 
   if (bom_off != 0) buf_copy (in, bom_buf, bom_off);
 
@@ -312,7 +312,7 @@ done:
 
 // -----------------------------------------------------------------------------
 // Write the byte order mark (BOM)
-static void mark (utf_enc_t enc, bint bswp_out)
+static void mark (utf_enc_t enc, bool bswp_out)
 {
   if (enc == utf8)
   {
@@ -342,7 +342,7 @@ int main (int argc, char** argv)
 {
   // Parse command line arguments
   char* app = *argv;
-  bint help = false;
+  bool help = false;
 
   if ((argc < 1) || (argc > 5))
   {
@@ -394,10 +394,10 @@ error_help:
   }
 
   utf_enc_t in = utf_auto;
-  bint bswp_in = false;
+  bool bswp_in = false;
 
   utf_enc_t out = utf_none;
-  bint bswp_out = false;
+  bool bswp_out = false;
 
   utf_bom_t bom = bom_auto;
 
@@ -633,7 +633,7 @@ assume_utf8:
   }
 
   // Validate only?
-  bint copy = false;
+  bool copy = false;
 
   if (in == out)
   {
