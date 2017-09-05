@@ -376,7 +376,7 @@ fallback:
       {
         n = 1;
 
-needspace:
+need_space:
         *end = (u8*)i;
         *num = (size_t)(o - out);
 
@@ -406,7 +406,7 @@ needspace:
       {
         t = -1;
 
-tooshort:
+too_short:
         *end = (u8*)i;
 
   #if T(SIZE)
@@ -449,7 +449,7 @@ invalid:
       if (unlikely (o == m))
       {
         n = 1;
-        goto needspace;
+        goto need_space;
       }
 
       *o++ = w;
@@ -465,7 +465,7 @@ invalid:
       if (unlikely ((i + 3) > e))
       {
         t = e - (i + 3);
-        goto tooshort;
+        goto too_short;
       }
 #endif
 
@@ -531,7 +531,7 @@ invalid:
       if (unlikely (o == m))
       {
         n = 1;
-        goto needspace;
+        goto need_space;
       }
 
       *o++ = w;
@@ -551,7 +551,7 @@ invalid:
       if (unlikely ((i + 4) > e))
       {
         t = e - (i + 4);
-        goto tooshort;
+        goto too_short;
       }
 #endif
 
@@ -624,7 +624,7 @@ invalid:
       if (unlikely ((o + 2) > m))
       {
         n = (o + 2) - m;
-        goto needspace;
+        goto need_space;
       }
 
       o[0] = utf16_surr_make_high (w);

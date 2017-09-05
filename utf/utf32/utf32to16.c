@@ -240,7 +240,7 @@ fallback:
       {
         n = 1;
 
-needspace:
+need_space:
         *end = (u32*)i;
         *num = (size_t)(o - out);
 
@@ -277,7 +277,7 @@ needspace:
       if (unlikely ((o + 2) > m))
       {
         n = (o + 2) - m;
-        goto needspace;
+        goto need_space;
       }
 
       // Compose the UTF-16 surrogate pair

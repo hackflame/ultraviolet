@@ -318,7 +318,7 @@ fallback:
       {
         n = 1;
 
-needspace:
+need_space:
         *end = (u16*)i;
         *num = (size_t)(o - out);
 
@@ -348,7 +348,7 @@ needspace:
       if (unlikely ((o + 2) > m))
       {
         n = (o + 2) - m;
-        goto needspace;
+        goto need_space;
       }
 
       // Compose the 2-byte UTF-8 codepoint
@@ -378,7 +378,7 @@ needspace:
       if (unlikely ((o + 3) > m))
       {
         n = (o + 3) - m;
-        goto needspace;
+        goto need_space;
       }
 
       // Compose the 3-byte UTF-8 codepoint
@@ -403,7 +403,7 @@ needspace:
       // Check if the input ends abruptly
       if (unlikely ((i + 2) > e))
       {
-tooshort:
+too_short:
         *end = (u16*)i;
 
   #if T(SIZE)
@@ -450,7 +450,7 @@ invalid:
       if (unlikely ((o + 4) > m))
       {
         n = (o + 4) - m;
-        goto needspace;
+        goto need_space;
       }
 
       // Compose the 4-byte UTF-8 codepoint

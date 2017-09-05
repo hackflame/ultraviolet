@@ -236,7 +236,7 @@ fallback:
       // Check if there's enough space in the output buffer
       if (unlikely (o == m))
       {
-needspace:
+need_space:
         *end = (u16*)i;
         *num = (size_t)(o - out);
 
@@ -268,7 +268,7 @@ needspace:
       // Check if the input ends abruptly
       if (unlikely ((i + 2) > e))
       {
-tooshort:
+too_short:
         *end = (u16*)i;
 
   #if T(SIZE)
@@ -312,7 +312,7 @@ invalid:
 #if T(SIZE)
       sz++;
 #else
-      if (unlikely (o == m)) goto needspace;
+      if (unlikely (o == m)) goto need_space;
 
       *o++ = w;
 #endif

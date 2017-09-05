@@ -130,7 +130,7 @@ fallback:
         {
           t = -1;
 
-tooshort:
+too_short:
           *end = (u8*)i;
           *num = pts;
 
@@ -172,7 +172,7 @@ invalid:
         if (unlikely ((i + 3) > e))
         {
           t = e - (i + 3);
-          goto tooshort;
+          goto too_short;
         }
 #endif
 
@@ -246,7 +246,7 @@ invalid:
         if (unlikely ((i + 4) > e))
         {
           t = e - (i + 4);
-          goto tooshort;
+          goto too_short;
         }
 #endif
 

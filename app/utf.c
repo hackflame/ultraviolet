@@ -8,7 +8,6 @@
 
 #include <quantum/build.h>
 #include <quantum/core.h>
-
 #include <quantum/integer.h>
 #include <quantum/string/implicit.h>
 #include <quantum/io.h>

@@ -132,7 +132,7 @@ fallback:
       // Check if the input ends abruptly
       if (unlikely ((i + 2) > e))
       {
-tooshort:
+too_short:
         *end = (u16*)i;
         *num = pts;
 
