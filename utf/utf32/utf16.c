@@ -57,12 +57,7 @@
       if (unlikely (o == m))
       {
         n = 1;
-
-need_space:
-        *end = (u32*)i;
-        *num = (T_size_t)(o - out);
-
-        return n;
+        goto need_space;
       }
 
       *o = c;
@@ -137,6 +132,14 @@ invalid:
 #endif
 
   return 0;
+
+#if !T(SIZE)
+need_space:
+  *end = (u32*)i;
+  *num = (T_size_t)(o - out);
+
+  return n;
+#endif
 }
 
 // -----------------------------------------------------------------------------

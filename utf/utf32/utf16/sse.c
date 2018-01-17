@@ -40,7 +40,8 @@ simd:
 
 #if !T(EXPLICIT)
     // Catch the terminating null character
-    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi32 (xi, _mm_setzero_si128())) != 0)) goto scalar;
+    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi32 (xi
+    , _mm_setzero_si128())) != 0)) goto scalar;
 #endif
 
     // Adjust the input vector for signed comparison
@@ -48,16 +49,19 @@ simd:
 
 #if T(VALID)
     // Check for UTF-16 surrogate characters
-    xi128 xsur = _mm_cmpeq_epi32 (_mm_and_si128 (xi, _mm_set1_epi32 (0x1FF800)), _mm_set1_epi32 (0xD800));
+    xi128 xsur = _mm_cmpeq_epi32 (_mm_and_si128 (xi
+    , _mm_set1_epi32 (0x1FF800)), _mm_set1_epi32 (0xD800));
 
     // Check for Unicode non-characters
-    xi128 xnon = _mm_and_si128 (_mm_cmpgt_epi32 (xv, _mm_set1_epi32 ((0xFDD0 - 1) ^ 0x80000000))
+    xi128 xnon = _mm_and_si128 (_mm_cmpgt_epi32 (xv
+    , _mm_set1_epi32 ((0xFDD0 - 1) ^ 0x80000000))
     , _mm_cmplt_epi32 (xv, _mm_set1_epi32 ((0xFDEF + 1) ^ 0x80000000)));
 
     // Check for reserved Unicode characters
     xi128 xrsrv = _mm_cmpeq_epi32 (_mm_and_si128 (xi, xfffe), xfffe);
 
-    if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (_mm_or_si128 (xsur, xnon), xrsrv)) != 0)) goto scalar;
+    if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (_mm_or_si128 (xsur
+    , xnon), xrsrv)) != 0)) goto scalar;
 #endif
 
     // Find out which UTF-32 characters transform into UTF-16 surrogate pairs
@@ -137,23 +141,39 @@ simd:
     xi128 xb1 = _mm_andnot_si128 (xs, xi);
 
     // Get the low surrogate halves
-    xi128 xb2 = _mm_and_si128 (xs, _mm_or_si128 (_mm_and_si128 (xi, _mm_set1_epi32 (0x3FF)), _mm_set1_epi32 (0xDC00)));
+    xi128 xb2 = _mm_and_si128 (xs, _mm_or_si128 (_mm_and_si128 (xi
+    , _mm_set1_epi32 (0x3FF)), _mm_set1_epi32 (0xDC00)));
 
     // Move 10 bits
     xi = _mm_srli_epi32 (xi, 10);
 
     // Get the high surrogate halves
-    xb1 = _mm_or_si128 (xb1, _mm_and_si128 (xs, _mm_add_epi32 (xi, _mm_set1_epi32 (0xD800 - 0x40))));
+    xb1 = _mm_or_si128 (xb1, _mm_and_si128 (xs, _mm_add_epi32 (xi
+    , _mm_set1_epi32 (0xD800 - 0x40))));
 
     // Obtain the final UTF-8 bytes
     xb1 = _mm_packus_epi32 (xb1, xz);
     xb2 = _mm_packus_epi32 (xb2, xz);
 
-    xi128 xb1l = _mm_shuffle_epi8 (_mm_packus_epi16 (_mm_and_si128 (xb1, _mm_set1_epi16 (0xFF)), xz), xshf);
-    xi128 xb1h = _mm_shuffle_epi8 (_mm_packus_epi16 (_mm_srli_epi16 (xb1, 8), xz), xshf);
+    xi128 xb1l = _mm_shuffle_epi8 (_mm_packus_epi16
+    (
+      _mm_and_si128 (xb1, _mm_set1_epi16 (0xFF)), xz), xshf
+    );
 
-    xi128 xb2l = _mm_shuffle_epi8 (_mm_packus_epi16 (_mm_and_si128 (xb2, _mm_set1_epi16 (0xFF)), xz), xshf);
-    xi128 xb2h = _mm_shuffle_epi8 (_mm_packus_epi16 (_mm_srli_epi16 (xb2, 8), xz), xshf);
+    xi128 xb1h = _mm_shuffle_epi8 (_mm_packus_epi16
+    (
+      _mm_srli_epi16 (xb1, 8), xz), xshf
+    );
+
+    xi128 xb2l = _mm_shuffle_epi8 (_mm_packus_epi16
+    (
+      _mm_and_si128 (xb2, _mm_set1_epi16 (0xFF)), xz), xshf
+    );
+
+    xi128 xb2h = _mm_shuffle_epi8 (_mm_packus_epi16
+    (
+      _mm_srli_epi16 (xb2, 8), xz), xshf
+    );
 
     // Merge the results and store
     xi128 xul = _mm_unpacklo_epi8 (xb1l, xb1h);

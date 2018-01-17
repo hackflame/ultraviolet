@@ -46,12 +46,7 @@
       if (unlikely (o == m))
       {
         n = 1;
-
-need_space:
-        *end = (u16*)i;
-        *num = (T_size_t)(o - out);
-
-        return n;
+        goto need_space;
       }
 
       *o = c;
@@ -127,19 +122,7 @@ need_space:
     {
 #if T(EXPLICIT)
       // Check if the input ends abruptly
-      if (unlikely ((i + 2u) > e))
-      {
-too_short:
-        *end = (u16*)i;
-
-  #if T(SIZE)
-        *num = sz;
-  #else
-        *num = (T_size_t)(o - out);
-  #endif
-
-        return -1;
-      }
+      if (unlikely ((i + 2u) > e)) goto too_short;
 #endif
 
       // Get the low surrogate character
@@ -215,6 +198,25 @@ invalid:
 #endif
 
   return INT_MIN;
+
+too_short:
+  *end = (u16*)i;
+
+#if T(SIZE)
+  *num = sz;
+#else
+  *num = (T_size_t)(o - out);
+#endif
+
+  return -1;
+
+#if !T(SIZE)
+need_space:
+  *end = (u16*)i;
+  *num = (T_size_t)(o - out);
+
+  return n;
+#endif
 }
 
 // -----------------------------------------------------------------------------

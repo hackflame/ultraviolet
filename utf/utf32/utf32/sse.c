@@ -28,7 +28,8 @@ simd:
 
 #if !T(EXPLICIT)
     // Catch the terminating null character
-    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi32 (xi, _mm_setzero_si128())) != 0)) goto scalar;
+    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi32 (xi
+    , _mm_setzero_si128())) != 0)) goto scalar;
 #endif
 
     // Adjust the input vector for signed comparison
@@ -36,16 +37,19 @@ simd:
 
 #if T(VALID)
     // Check for UTF-16 surrogate characters
-    xi128 xsur = _mm_cmpeq_epi32 (_mm_and_si128 (xi, _mm_set1_epi32 (0x1FF800)), _mm_set1_epi32 (0xD800));
+    xi128 xsur = _mm_cmpeq_epi32 (_mm_and_si128 (xi
+    , _mm_set1_epi32 (0x1FF800)), _mm_set1_epi32 (0xD800));
 
     // Check for Unicode non-characters
-    xi128 xnon = _mm_and_si128 (_mm_cmpgt_epi32 (xv, _mm_set1_epi32 ((0xFDD0 - 1) ^ 0x80000000))
+    xi128 xnon = _mm_and_si128 (_mm_cmpgt_epi32 (xv
+    , _mm_set1_epi32 ((0xFDD0 - 1) ^ 0x80000000))
     , _mm_cmplt_epi32 (xv, _mm_set1_epi32 ((0xFDEF + 1) ^ 0x80000000)));
 
     // Check for reserved Unicode characters
     xi128 xrsrv = _mm_cmpeq_epi32 (_mm_and_si128 (xi, xfffe), xfffe);
 
-    if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (_mm_or_si128 (xsur, xnon), xrsrv)) != 0)) goto scalar;
+    if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (_mm_or_si128 (xsur
+    , xnon), xrsrv)) != 0)) goto scalar;
 #endif
 
     // Find out which UTF-32 characters transform into UTF-16 surrogate pairs

@@ -47,12 +47,7 @@
       if (unlikely (o == m))
       {
         n = 1;
-
-need_space:
-        *end = (u8*)i;
-        *num = (T_size_t)(o - out);
-
-        return n;
+        goto need_space;
       }
 
       *o = c;
@@ -74,17 +69,7 @@ need_space:
       if (unlikely ((i + 2u) > e))
       {
         t = -1;
-
-too_short:
-        *end = (u8*)i;
-
-  #if T(SIZE)
-        *num = sz;
-  #else
-        *num = (T_size_t)(o - out);
-  #endif
-
-        return t;
+        goto too_short;
       }
 #endif
 
@@ -311,6 +296,7 @@ too_short:
 #endif
   }
 
+done:
   *end = (u8*)i;
 
 #if T(SIZE)
@@ -331,6 +317,25 @@ invalid:
 #endif
 
   return INT_MIN;
+
+too_short:
+  *end = (u8*)i;
+
+#if T(SIZE)
+  *num = sz;
+#else
+  *num = (T_size_t)(o - out);
+#endif
+
+  return t;
+
+#if !T(SIZE)
+need_space:
+  *end = (u8*)i;
+  *num = (T_size_t)(o - out);
+
+  return n;
+#endif
 }
 
 // -----------------------------------------------------------------------------

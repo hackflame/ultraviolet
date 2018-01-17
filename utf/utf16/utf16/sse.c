@@ -29,14 +29,16 @@ simd:
 
 #if !T(EXPLICIT)
     // Catch the terminating null character
-    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi16 (xi, _mm_setzero_si128())) != 0)) goto scalar;
+    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi16 (xi
+    , _mm_setzero_si128())) != 0)) goto scalar;
 #endif
 
     // Adjust the input vector for signed comparison
     xi128 xv = _mm_xor_si128 (xi, _mm_set1_epi16 (0x8000));
 
     // Check if this vector contains only characters from the basic multilingual plane
-    xi128 xs = _mm_cmpeq_epi16 (_mm_and_si128 (xi, _mm_set1_epi16 (0xF800)), xd800);
+    xi128 xs = _mm_cmpeq_epi16 (_mm_and_si128 (xi
+    , _mm_set1_epi16 (0xF800)), xd800);
 
     if (likely (_mm_movemask_epi8 (xs) == 0))
     {
@@ -44,13 +46,15 @@ simd:
 
 #if T(VALID)
       // Check for Unicode non-characters
-      xi128 xnon = _mm_and_si128 (_mm_cmpgt_epi16 (xv, _mm_set1_epi16 ((0xFDD0 - 1) ^ 0x8000))
+      xi128 xnon = _mm_and_si128 (_mm_cmpgt_epi16 (xv
+      , _mm_set1_epi16 ((0xFDD0 - 1) ^ 0x8000))
       , _mm_cmplt_epi16 (xv, _mm_set1_epi16 ((0xFDEF + 1) ^ 0x8000)));
 
       // Check for reserved Unicode characters
       xi128 xrsrv = _mm_cmpeq_epi16 (_mm_and_si128 (xi, xfffe), xfffe);
 
-      if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (xnon, xrsrv)) != 0)) goto scalar;
+      if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (xnon
+      , xrsrv)) != 0)) goto scalar;
 #endif
 
       pts += 8u;

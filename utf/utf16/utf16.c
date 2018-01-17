@@ -58,14 +58,7 @@
     {
 #if T(EXPLICIT)
       // Check if the input ends abruptly
-      if (unlikely ((i + 2u) > e))
-      {
-too_short:
-        *end = (u16*)i;
-        *num = pts;
-
-        return -1;
-      }
+      if (unlikely ((i + 2u) > e)) goto too_short;
 #endif
 
       // Get the low surrogate character
@@ -115,6 +108,12 @@ invalid:
   *num = pts;
 
   return INT_MIN;
+
+too_short:
+  *end = (u16*)i;
+  *num = pts;
+
+  return -1;
 }
 
 // -----------------------------------------------------------------------------

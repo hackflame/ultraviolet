@@ -50,7 +50,8 @@ simd:
 
 #if !T(EXPLICIT)
     // Catch the terminating null character
-    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi8 (xi, _mm_setzero_si128())) != 0)) goto scalar;
+    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi8 (xi
+    , _mm_setzero_si128())) != 0)) goto scalar;
 #endif
 
     // Check if the input vector consists only of ASCII characters
@@ -104,10 +105,12 @@ simd:
 
   #if T(VALID)
       // Check if only ASCII characters have zero continuation bytes
-      if (unlikely ((ao ^ (uint)_mm_movemask_epi8 (_mm_cmpgt_epi8 (xcs, xz))) != 0)) goto scalar;
+      if (unlikely ((ao ^ (uint)_mm_movemask_epi8 (_mm_cmpgt_epi8 (xcs
+      , xz))) != 0)) goto scalar;
 
       // Check if there's enough continuation bytes in each two-byte sequence
-      if (unlikely (_mm_movemask_epi8 (_mm_cmpgt_epi8 (_mm_sub_epi8 (_mm_slli_si128 (xcs, 1), xcs), xone)) != 0)) goto scalar;
+      if (unlikely (_mm_movemask_epi8 (_mm_cmpgt_epi8 (_mm_sub_epi8 (_mm_slli_si128 (xcs
+      , 1), xcs), xone)) != 0)) goto scalar;
   #endif
 
       // Create the shift vector for the shuffle operation
@@ -202,10 +205,12 @@ simd:
 
   #if T(VALID)
     // Check if only ASCII characters have zero continuation bytes
-    if (unlikely ((ao ^ (uint)_mm_movemask_epi8 (_mm_cmpgt_epi8 (xcs, xz))) != 0)) goto scalar;
+    if (unlikely ((ao ^ (uint)_mm_movemask_epi8 (_mm_cmpgt_epi8 (xcs
+    , xz))) != 0)) goto scalar;
 
     // Check if there's enough continuation bytes in each multibyte sequence
-    if (unlikely (_mm_movemask_epi8 (_mm_cmpgt_epi8 (_mm_sub_epi8 (_mm_slli_si128 (xcs, 1), xcs), xone)) != 0)) goto scalar;
+    if (unlikely (_mm_movemask_epi8 (_mm_cmpgt_epi8 (_mm_sub_epi8 (_mm_slli_si128 (xcs
+    , 1), xcs), xone)) != 0)) goto scalar;
   #endif
 
     // Create the shift vector for the shuffle operation

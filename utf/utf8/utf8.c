@@ -74,12 +74,7 @@
         if (unlikely ((i + 2u) > e))
         {
           t = -1;
-
-too_short:
-          *end = (u8*)i;
-          *num = pts;
-
-          return t;
+          goto too_short;
         }
 #endif
 
@@ -279,6 +274,12 @@ invalid:
   *num = pts;
 
   return INT_MIN;
+
+too_short:
+  *end = (u8*)i;
+  *num = pts;
+
+  return t;
 }
 
 // -----------------------------------------------------------------------------

@@ -43,14 +43,16 @@ simd:
 
 #if !T(EXPLICIT)
     // Catch the terminating null character
-    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi16 (xi, _mm_setzero_si128())) != 0)) goto scalar;
+    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi16 (xi
+    , _mm_setzero_si128())) != 0)) goto scalar;
 #endif
 
     // Adjust the input vector for signed comparison
     xi128 xv = _mm_xor_si128 (xi, _mm_set1_epi16 (0x8000));
 
     // Check if this vector contains only characters from the basic multilingual plane
-    xi128 xs = _mm_cmpeq_epi16 (_mm_and_si128 (xi, _mm_set1_epi16 (0xF800)), xd800);
+    xi128 xs = _mm_cmpeq_epi16 (_mm_and_si128 (xi
+    , _mm_set1_epi16 (0xF800)), xd800);
 
     if (likely (_mm_movemask_epi8 (xs) == 0))
     {
@@ -58,13 +60,15 @@ simd:
 
 #if T(VALID)
       // Check for Unicode non-characters
-      xi128 xnon = _mm_and_si128 (_mm_cmpgt_epi16 (xv, _mm_set1_epi16 ((0xFDD0 - 1) ^ 0x8000))
+      xi128 xnon = _mm_and_si128 (_mm_cmpgt_epi16 (xv
+      , _mm_set1_epi16 ((0xFDD0 - 1) ^ 0x8000))
       , _mm_cmplt_epi16 (xv, _mm_set1_epi16 ((0xFDEF + 1) ^ 0x8000)));
 
       // Check for reserved Unicode characters
       xi128 xrsrv = _mm_cmpeq_epi16 (_mm_and_si128 (xi, xfffe), xfffe);
 
-      if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (xnon, xrsrv)) != 0)) goto scalar;
+      if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (xnon
+      , xrsrv)) != 0)) goto scalar;
 #endif
 
 #if T(SIZE)
@@ -91,7 +95,8 @@ simd:
     xi128 xbs = _mm_xor_si128 (_mm_slli_si128 (xhs, 2), xls);
 
     // Check for Unicode non-characters
-    xi128 xnon = _mm_and_si128 (_mm_cmpgt_epi16 (xv, _mm_set1_epi16 ((0xFDD0 - 1) ^ 0x8000))
+    xi128 xnon = _mm_and_si128 (_mm_cmpgt_epi16 (xv
+    , _mm_set1_epi16 ((0xFDD0 - 1) ^ 0x8000))
     , _mm_cmplt_epi16 (xv, _mm_set1_epi16 ((0xFDEF + 1) ^ 0x8000)));
 
     if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (xbs, xnon)) != 0)) goto scalar;
@@ -117,9 +122,10 @@ simd:
     // Split the surrogate pairs found in this vector
     xi128 xh = _mm_slli_si128 (_mm_and_si128 (_mm_and_si128 (xhs, xi), x3ff), 2);
 
-    xi128 xl = _mm_or_si128 (_mm_andnot_si128 (xs, xi), _mm_and_si128 (_mm_and_si128 (xi, xls), x3ff));
-    xl = _mm_or_si128 (_mm_slli_epi16 (xh, 10), xl);
+    xi128 xl = _mm_or_si128 (_mm_andnot_si128 (xs, xi)
+    , _mm_and_si128 (_mm_and_si128 (xi, xls), x3ff));
 
+    xl = _mm_or_si128 (_mm_slli_epi16 (xh, 10), xl);
     xh = _mm_srli_epi16 (xh, 6);
 
   #if T(VALID)
@@ -129,13 +135,15 @@ simd:
     // Check for Unicode characters larger than maximum allowed codepoint
     xi128 xmax = _mm_cmpgt_epi16 (xh, _mm_set1_epi16 (0xF));
 
-    if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (xmax, xrsrv)) != 0)) goto scalar;
+    if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (xmax
+    , xrsrv)) != 0)) goto scalar;
   #endif
 
   #if T(SIZE)
     sz += oa;
   #else
-    xh = _mm_add_epi16 (xh, _mm_slli_si128 (_mm_and_si128 (xhs, _mm_set1_epi16 (0x10000 >> 16)), 2));
+    xh = _mm_add_epi16 (xh, _mm_slli_si128 (_mm_and_si128 (xhs
+    , _mm_set1_epi16 (0x10000 >> 16)), 2));
 
     // Obtain the shuffle vector
     xi128 xsh1 = _mm_srli_si128 (xsh, 1);

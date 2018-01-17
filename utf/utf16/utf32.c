@@ -50,14 +50,7 @@
       sz++;
 #else
       // Check if there's enough space in the output buffer
-      if (unlikely (o == m))
-      {
-need_space:
-        *end = (u16*)i;
-        *num = (T_size_t)(o - out);
-
-        return 1;
-      }
+      if (unlikely (o == m)) goto need_space;
 
       *o = c;
       o++;
@@ -79,19 +72,7 @@ need_space:
     {
 #if T(EXPLICIT)
       // Check if the input ends abruptly
-      if (unlikely ((i + 2u) > e))
-      {
-too_short:
-        *end = (u16*)i;
-
-  #if T(SIZE)
-        *num = sz;
-  #else
-        *num = (T_size_t)(o - out);
-  #endif
-
-        return -1;
-      }
+      if (unlikely ((i + 2u) > e)) goto too_short;
 #endif
 
       // Get the low surrogate character
@@ -158,6 +139,25 @@ invalid:
 #endif
 
   return INT_MIN;
+
+too_short:
+  *end = (u16*)i;
+
+#if T(SIZE)
+  *num = sz;
+#else
+  *num = (T_size_t)(o - out);
+#endif
+
+  return -1;
+
+#if !T(SIZE)
+need_space:
+  *end = (u16*)i;
+  *num = (T_size_t)(o - out);
+
+  return 1;
+#endif
 }
 
 // -----------------------------------------------------------------------------
