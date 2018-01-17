@@ -1,96 +1,24 @@
 // =============================================================================
-// <utf16/utf16.c>
-//
-// UTF-16 template.
+// <utf/utf16/utf16.c>
 //
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
 
-if (true)
+#include "../intro.h"
+
+// -----------------------------------------------------------------------------
+
 {
-  const u16* restrict i = in;
+  const u16* i = in;
+  T_size_t pts = 0;
 
 #if T(EXPLICIT)
-  const u16* restrict e = in + len;
+  const u16* e = in + len;
 #endif
 
-  size_t pts = 0;
-
-#if CPU(SSE2)
-  const u16* restrict p;
-  const u16* restrict r;
-  uint b = 0;
-
-  const xi128 xd800 = _mm_set1_epi16 (0xD800);
-  const xi128 xfffe = _mm_set1_epi16 (0xFFFE);
-
-  #if T(EXPLICIT)
-    p = e - 8;
-  #else
-again:
-    p = ptr_align_ceil (CPU_PAGE_SIZE, i);
-    p -= 8;
-  #endif
-
-  // Process 8 words at a time using SSE
-recover:
-  while (i <= p)
-  {
-    // Get the input vector
-    xi128 xi = _mm_loadu_si128 ((const xi128*)i);
-
-  #if !T(EXPLICIT)
-    // Catch the terminating null character
-    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi16 (xi, _mm_setzero_si128())) != 0)) goto scalar;
-  #endif
-
-    // Adjust the input vector for signed comparison
-    xi128 xv = _mm_xor_si128 (xi, _mm_set1_epi16 (0x8000));
-
-    // Check if this vector contains only characters from the basic multilingual plane
-    xi128 xs = _mm_cmpeq_epi16 (_mm_and_si128 (xi, _mm_set1_epi16 (0xF800)), xd800);
-
-    if (likely (_mm_movemask_epi8 (xs) == 0))
-    {
-      b = 0;
-
-  #if T(VALID)
-      // Check for Unicode non-characters
-      xi128 xnon = _mm_and_si128 (_mm_cmpgt_epi16 (xv, _mm_set1_epi16 ((0xFDD0 - 1) ^ 0x8000))
-      , _mm_cmplt_epi16 (xv, _mm_set1_epi16 ((0xFDEF + 1) ^ 0x8000)));
-
-      // Check for reserved Unicode characters
-      xi128 xrsrv = _mm_cmpeq_epi16 (_mm_and_si128 (xi, xfffe), xfffe);
-
-      if (unlikely (_mm_movemask_epi8 (_mm_or_si128 (xnon, xrsrv)) != 0)) goto scalar;
-  #endif
-
-      pts += 8u;
-      i += 8;
-
-      continue;
-    }
-
-    // Back to scalar code since this vector contains non-BMP characters.
-    // Resort to scalar-only processing if this happens too often.
-    b++;
-
-    // Retry again after some time
-    r = (b >= 4) ? (i + 2048) : (i + 8);
-
-    goto fallback;
-  }
-
-  #if !T(EXPLICIT)
-    if (likely (p[8] != '\0')) goto again;
-  #endif
-
-scalar:
-  // Prevents return to SSE code when there are
-  // less than 8 characters left in the input
-  r = i + 8;
-
-fallback:
+#if T(UTF16_COUNT_SIMD)
+  // Include the SIMD code path
+  #include T_UTF16_COUNT_SIMD
 #endif
 
 #if T(EXPLICIT)
@@ -102,7 +30,7 @@ fallback:
     register uint c = *i;
 
     // BMP character
-    if (likely (!utf16_chr_is_surr (c)))
+    if (likely (!utf16_byte_is_surr (c)))
     {
 #if T(VALID)
       // Check for Unicode non-character
@@ -115,7 +43,7 @@ fallback:
       pts++;
 
 #if !T(EXPLICIT)
-      if (unlikely (c == '\0')) break;
+      if (unlikely (c == (uint)'\0')) break;
 #endif
 
       i++;
@@ -123,14 +51,14 @@ fallback:
 
     // Surrogate pair
 #if T(VALID)
-    else if (unlikely (utf16_chr_is_surr_high (c)))
+    else if (unlikely (utf16_byte_is_surr_high (c)))
 #else
     else
 #endif
     {
 #if T(EXPLICIT)
       // Check if the input ends abruptly
-      if (unlikely ((i + 2) > e))
+      if (unlikely ((i + 2u) > e))
       {
 too_short:
         *end = (u16*)i;
@@ -145,20 +73,14 @@ too_short:
 
 #if T(VALID)
       // Check if it's actually a low surrogate
-      if (unlikely (!utf16_chr_is_surr_low (cs))) goto invalid;
+      if (unlikely (!utf16_byte_is_surr_low (cs))) goto invalid;
 #elif !T(EXPLICIT)
-      if (unlikely (cs == '\0'))
-      {
-invalid:
-        *end = (u16*)i;
-        *num = pts;
-
-        return INT_MIN;
-      }
+      // Invalid sequence
+      if (unlikely (cs == (uint)'\0')) goto invalid;
 #endif
 
       // Compose the UTF-32 codepoint from the UTF-16 surrogate pair
-      u32 w = utf16_surr_to32 (c, cs);
+      u32 w = utf16_surr_to_chr (c, cs);
 
 #if T(VALID)
       // Check if the character exceeds the maximum allowed Unicode codepoint
@@ -170,24 +92,16 @@ invalid:
 
       pts++;
 
-      i += 2;
+      i += 2u;
     }
 
 #if T(VALID)
-    // Invalid sequence
-    else
-    {
-invalid:
-      *end = (u16*)i;
-      *num = pts;
-
-      return INT_MIN;
-    }
+    else goto invalid;
 #endif
 
-#if CPU(SSE2)
-    // Attempt to parse with SSE again
-    if (likely (i >= r)) goto recover;
+#if T(UTF16_COUNT_SIMD)
+    // Attempt to parse with SIMD again
+    if (likely (i >= r)) goto simd;
 #endif
   }
 
@@ -195,9 +109,19 @@ invalid:
   *num = pts;
 
   return 0;
+
+invalid:
+  *end = (u16*)i;
+  *num = pts;
+
+  return INT_MIN;
 }
 
 // -----------------------------------------------------------------------------
 
-#undef T_VALID
 #undef T_EXPLICIT
+#undef T_VALID
+
+// -----------------------------------------------------------------------------
+
+#include "../outro.h"

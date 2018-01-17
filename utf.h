@@ -1,4 +1,6 @@
 // =============================================================================
+//                               Ultraviolet
+// -----------------------------------------------------------------------------
 // <utf.h>
 //
 // Unicode transformation library for UTF-8, UTF-16, and UTF-32 encodings.
@@ -15,116 +17,267 @@
 
 // -----------------------------------------------------------------------------
 
+#define ULTRAVIOLET_VER 0x000001u
+#define ULTRAVIOLET_VER_STR "0.0.1"
+
+// -----------------------------------------------------------------------------
+
 #include <quantum/bitops.h>
+#include <quantum/character.h>
 #include <quantum/unicode.h>
 
 // =============================================================================
 // Constants
 // -----------------------------------------------------------------------------
-// Maximum sequence lengths
+// Maximum multibyte sequence lengths
 // -----------------------------------------------------------------------------
 
-#define UTF8_SEQ_LEN_MAX  4u
-#define UTF16_SEQ_LEN_MAX 2u
+#define UTF8_SEQ_MAX  4u
+#define UTF16_SEQ_MAX 2u
 
 // -----------------------------------------------------------------------------
 // http://unicode.org/faq/utf_bom.html
 // -----------------------------------------------------------------------------
 
-#define UTF16_HI_SURROGATE_START 0xD800u
-#define UTF16_HI_SURROGATE_END   0xDBFFu
+#define UTF16_HIGH_SURR_BEG 0xD800u
+#define UTF16_HIGH_SURR_END 0xDBFFu
 
-#define UTF16_LO_SURROGATE_START 0xDC00u
-#define UTF16_LO_SURROGATE_END   0xDFFFu
+#define UTF16_LOW_SURR_BEG 0xDC00u
+#define UTF16_LOW_SURR_END 0xDFFFu
 
-#define UTF16_LEAD_OFFSET (UTF16_HI_SURROGATE_START - (0x10000u >> 10))
-#define UTF16_SURROGATE_OFFSET (0x10000u - ((uf32)UTF16_HI_SURROGATE_START << 10) - UTF16_LO_SURROGATE_START)
+#define UTF16_LEAD_OFFSET (UTF16_HIGH_SURR_BEG - (0x10000u >> 10))
+#define UTF16_SURR_OFFSET (0x10000u - ((uf32)UTF16_HIGH_SURR_BEG << 10) - UTF16_LOW_SURR_BEG)
+
+// =============================================================================
+// Types
+// -----------------------------------------------------------------------------
+// Psst: just use `u8`, `u16`, and `u32`
+// -----------------------------------------------------------------------------
+// UTF-8
+// -----------------------------------------------------------------------------
+
+typedef u8 utf8_char_t;
+typedef utf8_char_t utf8_chr_t;
+
+typedef u16 utf16_char_t;
+typedef utf16_char_t utf16_chr_t;
+
+typedef u32 utf32_char_t;
+typedef utf32_char_t utf32_chr_t;
+
+// -----------------------------------------------------------------------------
+
+typedef struct utf8_str_s
+{
+  size_t len;
+  utf8_chr_t* buf;
+} utf8_str_t;
+
+static const utf8_str_t utf8_str_null = (utf8_str_t){0};
+
+#define utf8_str_make(buf, len) (utf8_str_t){(len), (buf)}
+#define utf8_str_from_istr(str) utf8_str_make ((str), utf8_istr_length (str))
+
+// -----------------------------------------------------------------------------
+
+typedef struct utf8_str_const_s
+{
+  size_t len;
+  const utf8_chr_t* buf;
+} utf8_str_const_t;
+
+static const utf8_str_const_t utf8_str_const_null = (utf8_str_const_t){0};
+
+#define utf8_str_const_make(buf, len) (utf8_str_const_t){(len), (buf)}
+
+#define utf8_str_const_from_istr(str) utf8_str_const_make ((str), utf8_istr_length (str))
+#define utf8_str_const_from_cstr(str) utf8_str_const_make ((str), cstrlen (str))
+
+// -----------------------------------------------------------------------------
+// These typedefs should not be used.
+//
+// They are provided only for self-documentation purposes and completeness sake.
+// -----------------------------------------------------------------------------
+
+typedef utf8_chr_t* utf8_istr_t;
+typedef const utf8_chr_t* utf8_istr_const_t;
+
+// -----------------------------------------------------------------------------
+// UTF-16
+// -----------------------------------------------------------------------------
+
+typedef struct utf16_str_s
+{
+  size_t len;
+  utf16_chr_t* buf;
+} utf16_str_t;
+
+static const utf16_str_t utf16_str_null = (utf16_str_t){0};
+
+#define utf16_str_make(buf, len) (utf16_str_t){(len), (buf)}
+#define utf16_str_from_istr(str) utf16_str_make ((str), utf16_istr_length (str))
+
+// -----------------------------------------------------------------------------
+
+typedef struct utf16_str_const_s
+{
+  size_t len;
+  const utf16_chr_t* buf;
+} utf16_str_const_t;
+
+static const utf16_str_const_t utf16_str_const_null = (utf16_str_const_t){0};
+
+#define utf16_str_const_make(buf, len) (utf16_str_const_t){(len), (buf)}
+
+#define utf16_str_const_from_istr(str) utf16_str_const_make ((str), utf16_istr_length (str))
+#define utf16_str_const_from_cstr(str) utf16_str_const_make ((str), cstrlen (str))
+
+// -----------------------------------------------------------------------------
+
+typedef utf16_chr_t* utf16_istr_t;
+typedef const utf16_chr_t* utf16_istr_const_t;
+
+// -----------------------------------------------------------------------------
+// UTF-32
+// -----------------------------------------------------------------------------
+
+typedef struct utf32_str_s
+{
+  size_t len;
+  utf32_chr_t* buf;
+} utf32_str_t;
+
+static const utf32_str_t utf32_str_null = (utf32_str_t){0};
+
+#define utf32_str_make(buf, len) (utf32_str_t){(len), (buf)}
+#define utf32_str_from_istr(str) utf32_str_make ((str), utf32_istr_length (str))
+
+// -----------------------------------------------------------------------------
+
+typedef struct utf32_str_const_s
+{
+  size_t len;
+  const utf32_chr_t* buf;
+} utf32_str_const_t;
+
+static const utf32_str_const_t utf32_str_const_null = (utf32_str_const_t){0};
+
+#define utf32_str_const_make(buf, len) (utf32_str_const_t){(len), (buf)}
+
+#define utf32_str_const_from_istr(str) utf32_str_const_make ((str), utf32_istr_length (str))
+#define utf32_str_const_from_cstr(str) utf32_str_const_make ((str), cstrlen (str))
+
+// -----------------------------------------------------------------------------
+
+typedef utf32_chr_t* utf32_istr_t;
+typedef const utf32_chr_t* utf32_istr_const_t;
 
 // =============================================================================
 // Macros
 // -----------------------------------------------------------------------------
-// UTF-8 character tests
+// UTF-8 byte tests
 // -----------------------------------------------------------------------------
-// Leading byte and length of the UTF-8 multibyte sequence that it represents
-#define utf8_chr_is_head1(c) ((c) < 0x80u)
-#define utf8_chr_is_head2(c) (((c) & 0xE0u) == 0xC0u)
-#define utf8_chr_is_head3(c) (((c) & 0xF0u) == 0xE0u)
-#define utf8_chr_is_head4(c) (((c) & 0xF8u) == 0xF0u)
-
-// -----------------------------------------------------------------------------
-// UTF-8 byte kind
-#define utf8_chr_is_ascii utf8_chr_is_head1
-#define utf8_chr_is_head(c) (utf8_chr_is_ascii (c) || (((c) & 0xC0u) == 0xC0u))
-#define utf8_chr_is_tail(c) (((c) & 0xC0u) == 0x80u)
-
-// -----------------------------------------------------------------------------
-// UTF-8 codepoint composition / decomposition
+// Byte kind
 // -----------------------------------------------------------------------------
 
-#define utf8_chr_bits(c) ((c) & 0x3Fu)
+#define utf8_byte_is_lead(c) (chr_is_ascii (c) || (((c) & 0xC0u) == 0xC0u))
+#define utf8_byte_is_trail(c) (((c) & 0xC0u) == 0x80u)
 
 // -----------------------------------------------------------------------------
-// Compose the leading (or head) byte
-#define utf8_codep_comp_head4(c) ((uf32)((c) & 0x7u) << 18)
-#define utf8_codep_comp_head3(c) (((c) & 0xFu) << 12)
-#define utf8_codep_comp_head2(c) (((c) & 0x1Fu) << 6)
+// Length of the multibyte sequence from the leading byte
+// -----------------------------------------------------------------------------
+
+#define utf8_byte_is_lead1(c) chr_is_ascii (c)
+#define utf8_byte_is_lead2(c) (((c) & 0xE0u) == 0xC0u)
+#define utf8_byte_is_lead3(c) (((c) & 0xF0u) == 0xE0u)
+#define utf8_byte_is_lead4(c) (((c) & 0xF8u) == 0xF0u)
 
 // -----------------------------------------------------------------------------
-// Compose the continuation (or tail, suffix, or trailing) bytes
-#define utf8_codep_comp_tail3(c) (utf8_chr_bits (c) << 12)
-#define utf8_codep_comp_tail2(c) (utf8_chr_bits (c) << 6)
-#define utf8_codep_comp_tail1(c) utf8_chr_bits (c)
+// Bits with actual character data
+#define utf8_byte_bits(c) ((c) & 0x3Fu)
 
 // -----------------------------------------------------------------------------
-// Compose the whole UTF-32 or UTF-16 codepoint
-#define utf8_codep_comp4(c4, c3, c2, c1) (utf8_codep_comp_head4 (c4) | utf8_codep_comp_tail3 (c3) | utf8_codep_comp_tail2 (c2) | utf8_codep_comp_tail1 (c1))
-#define utf8_codep_comp3(c3, c2, c1) (utf8_codep_comp_head3 (c3) | utf8_codep_comp_tail2 (c2) | utf8_codep_comp_tail1 (c1))
-#define utf8_codep_comp2(c2, c1) (utf8_codep_comp_head2 (c2) | utf8_codep_comp_tail1 (c1))
+// UTF-8 character composition / decomposition
+// -----------------------------------------------------------------------------
+// Compose the leading byte
+// -----------------------------------------------------------------------------
+
+#define utf8_chr_set_lead4(c) ((uf32)((c) & 0x7u) << 18)
+#define utf8_chr_set_lead3(c) (((c) & 0xFu) << 12)
+#define utf8_chr_set_lead2(c) (((c) & 0x1Fu) << 6)
+
+// -----------------------------------------------------------------------------
+// Compose the trailing bytes
+// -----------------------------------------------------------------------------
+
+#define utf8_chr_set_trail3(c) (utf8_byte_bits (c) << 12)
+#define utf8_chr_set_trail2(c) (utf8_byte_bits (c) << 6)
+#define utf8_chr_set_trail1(c) utf8_byte_bits (c)
+
+// -----------------------------------------------------------------------------
+// Compose the whole character
+// -----------------------------------------------------------------------------
+
+#define utf8_chr_make4(c4, c3, c2, c1) (utf8_chr_set_lead4 (c4) | utf8_chr_set_trail3 (c3) | utf8_chr_set_trail2 (c2) | utf8_chr_set_trail1 (c1))
+#define utf8_chr_make3(c3, c2, c1) (utf8_chr_set_lead3 (c3) | utf8_chr_set_trail2 (c2) | utf8_chr_set_trail1 (c1))
+#define utf8_chr_make2(c2, c1) (utf8_chr_set_lead2 (c2) | utf8_chr_set_trail1 (c1))
 
 // -----------------------------------------------------------------------------
 // Decompose the leading byte
+// -----------------------------------------------------------------------------
+
 #if 1
-  #define utf8_codep_decomp_head4(c) (((c) >> 18) | 0xF0u)
-  #define utf8_codep_decomp_head3(c) (((c) >> 12) | 0xE0u)
-  #define utf8_codep_decomp_head2(c) (((c) >> 6) | 0xC0u)
+  #define utf8_chr_get_lead4(c) (((c) >> 18) | 0xF0u)
+  #define utf8_chr_get_lead3(c) (((c) >> 12) | 0xE0u)
+  #define utf8_chr_get_lead2(c) (((c) >> 6) | 0xC0u)
 #else
-  #define utf8_codep_decomp_head4(c) ((((c) & 0x1C0000u) >> 18) | 0xF0u)
-  #define utf8_codep_decomp_head3(c) ((((c) & 0xF000u) >> 12) | 0xE0u)
-  #define utf8_codep_decomp_head2(c) ((((c) & 0x7C0u) >> 6) | 0xC0u)
+  #define utf8_chr_get_lead4(c) ((((c) & 0x1C0000u) >> 18) | 0xF0u)
+  #define utf8_chr_get_lead3(c) ((((c) & 0xF000u) >> 12) | 0xE0u)
+  #define utf8_chr_get_lead2(c) ((((c) & 0x7C0u) >> 6) | 0xC0u)
 #endif
 
 // -----------------------------------------------------------------------------
-// Decompose the continuation bytes
-#define utf8_codep_decomp_tail3(c) (utf8_chr_bits ((c) >> 12) | 0x80u)
-#define utf8_codep_decomp_tail2(c) (utf8_chr_bits ((c) >> 6) | 0x80u)
-#define utf8_codep_decomp_tail1(c) (utf8_chr_bits (c) | 0x80u)
+// Decompose the trailing bytes
+// -----------------------------------------------------------------------------
+
+#define utf8_chr_get_trail3(c) (utf8_byte_bits ((c) >> 12) | 0x80u)
+#define utf8_chr_get_trail2(c) (utf8_byte_bits ((c) >> 6) | 0x80u)
+#define utf8_chr_get_trail1(c) (utf8_byte_bits (c) | 0x80u)
+
+// -----------------------------------------------------------------------------
+// UTF-16 byte tests
+// -----------------------------------------------------------------------------
+// Test if a byte is (any) surrogate byte
+// -----------------------------------------------------------------------------
+
+#if 1
+  #define utf16_byte_is_surr(c) (((c) & 0xF800u) == 0xD800u)
+#else
+  #define utf16_byte_is_surr(c) (((c) >= UTF16_HIGH_SURR_BEG) && ((c) <= UTF16_LOW_SURR_END))
+#endif
+
+// -----------------------------------------------------------------------------
+// Test if a byte is a high surrogate byte
+// -----------------------------------------------------------------------------
+
+#if 1
+  #define utf16_byte_is_surr_high(c) (((c) & 0xFC00u) == 0xD800u)
+#else
+  #define utf16_byte_is_surr_high(c) (((c) >= UTF16_HIGH_SURR_BEG) && ((c) <= UTF16_HIGH_SURR_END))
+#endif
+
+// -----------------------------------------------------------------------------
+// Test if a byte is a low surrogate byte
+// -----------------------------------------------------------------------------
+
+#if 1
+  #define utf16_byte_is_surr_low(c) (((c) & 0xFC00u) == 0xDC00u)
+#else
+  #define utf16_byte_is_surr_low(c) (((c) >= UTF16_LOW_SURR_BEG) && ((c) <= UTF16_LOW_SURR_END))
+#endif
 
 // -----------------------------------------------------------------------------
 // UTF-16 character tests
-// -----------------------------------------------------------------------------
-// Test if a character is a surrogate character
-#if 1
-  #define utf16_chr_is_surr(c) (((c) & 0xF800u) == 0xD800u)
-#else
-  #define utf16_chr_is_surr(c) (((c) >= UTF16_HI_SURROGATE_START) && ((c) <= UTF16_LO_SURROGATE_END))
-#endif
-
-// -----------------------------------------------------------------------------
-// Test if a character is a high surrogate character
-#if 1
-  #define utf16_chr_is_surr_high(c) (((c) & 0xFC00u) == 0xD800u)
-#else
-  #define utf16_chr_is_surr_high(c) (((c) >= UTF16_HI_SURROGATE_START) && ((c) <= UTF16_HI_SURROGATE_END))
-#endif
-
-// -----------------------------------------------------------------------------
-// Test if a character is a low surrogate character
-#if 1
-  #define utf16_chr_is_surr_low(c) (((c) & 0xFC00u) == 0xDC00u)
-#else
-  #define utf16_chr_is_surr_low(c) (((c) >= UTF16_LO_SURROGATE_START) && ((c) <= UTF16_LO_SURROGATE_END))
-#endif
-
 // -----------------------------------------------------------------------------
 // Test if a character is a non-character
 #define utf16_chr_is_non(c) (((c) - 0xFDD0u) < 32u)
@@ -134,34 +287,39 @@
 #define utf16_chr_is_rsrv(c) (((c) & 0xFFFEu) == 0xFFFEu)
 
 // -----------------------------------------------------------------------------
-// Number of UTF-8 sequence characters that a given UTF-8 character decodes to
-#define utf16_chr_is8_lead1(c) utf8_chr_is_ascii (c)
-#define utf16_chr_is8_lead2(c) ((c) < 0x800u)
-// Test for a surrogate UTF-16 character first
-#define utf16_chr_is8_lead3(c) ((c) >= 0x800u)
+// UTF-8 multibyte sequence length that a given UTF-16 character decodes to.
+// Test for a surrogate UTF-16 byte first.
+// -----------------------------------------------------------------------------
+
+#define utf16_chr_is_lead1(c) chr_is_ascii (c)
+#define utf16_chr_is_lead2(c) ((c) < 0x800u)
+#define utf16_chr_is_lead3(c) ((c) >= 0x800u)
 
 // -----------------------------------------------------------------------------
-// Construct UTF-16 surrogate pair from a UTF-32 character
-#define utf16_surr_make_high(c) (((c) >> 10) + UTF16_LEAD_OFFSET)
-#define utf16_surr_make_low(c) (((c) & 0x3FFu) | UTF16_LO_SURROGATE_START)
+// Construct a UTF-16 surrogate pair from a UTF-32 character
+// -----------------------------------------------------------------------------
+
+#define utf16_make_surr_high(c) (((c) >> 10) + UTF16_LEAD_OFFSET)
+#define utf16_make_surr_low(c) (((c) & 0x3FFu) | UTF16_LOW_SURR_BEG)
 
 // -----------------------------------------------------------------------------
 // Construct a UTF-32 character from a UTF-16 surrogate pair
-#define utf16_surr_to32(hi, lo) ((((uf32)((hi) & 0x3FFu) << 10) + 0x10000u) | ((lo) & 0x3FFu))
+#define utf16_surr_to_chr(hi, lo) ((((uf32)((hi) & 0x3FFu) << 10) + 0x10000u) | ((lo) & 0x3FFu))
 
 // -----------------------------------------------------------------------------
 // UTF-32 character tests
 // -----------------------------------------------------------------------------
-// Number of UTF-8 sequence characters that a given UTF-32 character decodes to
-#define utf32_chr_is8_lead1(c) utf8_chr_is_ascii (c)
-#define utf32_chr_is8_lead2(c) utf16_chr_is8_lead2 (c)
-#define utf32_chr_is8_lead3(c) ((c) < 0x10000u)
-#define utf32_chr_is8_lead4(c) ((c) < 0x110000u)
+// UTF-8 multibyte sequence length that a given UTF-32 character decodes to
+// -----------------------------------------------------------------------------
+
+#define utf32_chr_is_lead1(c) chr_is_ascii (c)
+#define utf32_chr_is_lead2(c) utf16_chr_is_lead2 (c)
+#define utf32_chr_is_lead3(c) ((c) < 0x10000u)
+#define utf32_chr_is_lead4(c) ((c) < 0x110000u)
 
 // -----------------------------------------------------------------------------
-// Number of UTF-16 characters that a given UTF-32 character decodes to
-#define utf32_chr_is16_chr(c) utf32_chr_is8_lead3 (c)
-#define utf32_chr_is16_surr(c) ((c) >= 0x10000u)
+// Test if a given UTF-32 character decodes into UTF-16 surrogate pair
+#define utf32_chr_is_surr(c) ((c) >= 0x10000u)
 
 // =============================================================================
 // Functions
@@ -171,209 +329,225 @@
 // UTF-8
 // -----------------------------------------------------------------------------
 
-static inline u8* utf8_ptr_sync (const u8* ptr, const u8* end)
+static inline u8* utf8_str_sync (const u8* buf, const u8* end)
 {
-  while (ptr != end)
+  while (buf != end)
   {
-    if (utf8_chr_is_head (*ptr)) return (u8*)ptr;
-    ptr++;
+    if (utf8_byte_is_lead (*buf)) return (u8*)buf;
+    buf++;
   }
 
   return null;
 }
 
-static inline u8* utf8_ptr_rsync (const u8* ptr, const u8* buf)
+static inline u8* utf8_str_rsync (const u8* buf, const u8* beg)
 {
-  while (ptr >= buf)
+  while (buf >= beg)
   {
-    if (utf8_chr_is_head (*ptr)) return (u8*)ptr;
-    ptr--;
+    if (utf8_byte_is_lead (*buf)) return (u8*)buf;
+    buf--;
   }
 
   return null;
 }
 
 // -----------------------------------------------------------------------------
+// Versions for implicit strings
+// -----------------------------------------------------------------------------
 
-static inline u8* utf8_ptri_sync (const u8* ptr)
+static inline u8* utf8_istr_sync (const u8* str)
 {
   while (true)
   {
-    if (utf8_chr_is_head (*ptr)) return (u8*)ptr;
-    ptr++;
+    if (utf8_byte_is_lead (*str)) return (u8*)str;
+    str++;
   }
 
   assume_unreachable();
 }
 
-#define utf8_ptri_rsync utf8_ptr_rsync
+#define utf8_istr_rsync(str) utf8_str_rsync (str)
 
 // -----------------------------------------------------------------------------
+// `ptr` must be synchronized
+// -----------------------------------------------------------------------------
 
-static inline u8* utf8_ptr_seek (const u8* ptr, const u8* end)
+static inline u8* utf8_chr_next (const u8* ptr)
 {
-  register uint c = *ptr;
+  register uint b = *ptr;
 
-  if (utf8_chr_is_head1 (c)) return (u8*)(ptr + 1);
+  if (utf8_byte_is_lead1 (b)) return (u8*)(ptr + 1u);
 
 #if CPU(X86)
-  register uint n = bsr32 (~c << 24);
+  register uint n = bsr32 (~b << 24);
 
   if (unlikely (n > 4u)) return null;
 
-  ptr += n;
+  return (u8*)(ptr + n);
 #else
-  if (utf8_chr_is_head2 (c)) ptr += 2;
-  else if (utf8_chr_is_head3 (c)) ptr += 3;
-  else if (utf8_chr_is_head4 (c)) ptr += 4;
-  else return null;
+  if (utf8_byte_is_lead2 (b)) return (u8*)(ptr + 2u);
+  if (utf8_byte_is_lead3 (b)) return (u8*)(ptr + 3u);
+  if (utf8_byte_is_lead4 (b)) return (u8*)(ptr + 4u);
+
+  return null;
 #endif
+}
 
-  if (unlikely (ptr > end)) return null;
+// -----------------------------------------------------------------------------
 
-  if (likely (ptr != end)) return utf8_chr_is_tail (*ptr) ? null : (u8*)ptr;
+static inline u8* utf8_str_seek (const u8* buf, const u8* end)
+{
+  const u8* ptr = utf8_chr_next (buf);
+
+  if (unlikely (ptr == null)) return null;
+  if (unlikely (ptr >= end)) return null;
 
   return (u8*)ptr;
 }
 
-static inline u8* utf8_ptr_rseek (const u8* ptr, const u8* buf)
+static inline u8* utf8_str_rseek (const u8* buf, const u8* beg)
 {
-  return utf8_ptr_rsync (ptr - 1, buf);
+  return utf8_str_rsync (buf - 1u, beg);
 }
 
 // -----------------------------------------------------------------------------
 
-static inline u8* utf8_ptri_seek (const u8* ptr)
+static inline u8* utf8_istr_seek (const u8* str)
 {
-  return utf8_ptri_sync (ptr + 1);
+  return utf8_istr_sync (str + 1u);
 }
 
-#define utf8_ptri_rseek utf8_ptr_rseek
+#define utf8_istr_rseek(str) utf8_str_rseek (str)
 
 // -----------------------------------------------------------------------------
 // UTF-16
 // -----------------------------------------------------------------------------
 
-static inline u16* utf16_ptr_sync (const u16* ptr, const u16* end)
+static inline u16* utf16_str_sync (const u16* buf, const u16* end)
 {
-  if (utf16_chr_is_surr_low (*ptr))
+  if (utf16_byte_is_surr_low (*buf))
   {
-    ptr++;
-
-    if (unlikely (ptr == end)) return null;
-
-    return utf16_chr_is_surr_low (*ptr) ? null : (u16*)ptr;
+    buf++;
+    if (unlikely (buf == end)) return null;
   }
+
+  return (u16*)buf;
+}
+
+static inline u16* utf16_str_rsync (const u16* buf, const u16* beg)
+{
+  if (utf16_byte_is_surr_low (*buf))
+  {
+    if (unlikely (buf == beg)) return null;
+    buf--;
+  }
+
+  return (u16*)buf;
+}
+
+// -----------------------------------------------------------------------------
+
+static inline u16* utf16_istr_sync (const u16* str)
+{
+  if (utf16_byte_is_surr_low (*str)) return (u16*)(str + 1u);
+  return (u16*)str;
+}
+
+#define utf16_istr_rsync(str) utf16_str_rsync (str)
+
+// -----------------------------------------------------------------------------
+
+static inline u16* utf16_chr_next (const u16* ptr)
+{
+  register uint b = *ptr;
+
+  if (!utf16_byte_is_surr (b)) return (u16*)(ptr + 1u);
+  if (utf16_byte_is_surr_high (b)) return (u16*)(ptr + 2u);
+
+  return null;
+}
+
+// -----------------------------------------------------------------------------
+
+static inline u16* utf16_str_seek (const u16* buf, const u16* end)
+{
+  const u16* ptr = utf16_chr_next (buf);
+
+  if (unlikely (ptr == null)) return null;
+  if (unlikely (ptr >= end)) return null;
 
   return (u16*)ptr;
 }
 
-static inline u16* utf16_ptr_rsync (const u16* ptr, const u16* buf)
+static inline u16* utf16_str_rseek (const u16* buf, const u16* beg)
 {
-  if (utf16_chr_is_surr_low (*ptr))
-  {
-    if (unlikely (ptr == buf)) return null;
-
-    ptr--;
-
-    return utf16_chr_is_surr_low (*ptr) ? null : (u16*)ptr;
-  }
-
-  return (u16*)ptr;
+  utf16_str_rsync (buf - 1u, beg);
 }
 
 // -----------------------------------------------------------------------------
 
-static inline u16* utf16_ptri_sync (const u16* ptr)
+static inline u16* utf16_istr_seek (const u16* str)
 {
-  if (utf16_chr_is_surr_low (*ptr))
-  {
-    ptr++;
-
-    if (unlikely (*ptr == '\0')) return null;
-
-    return utf16_chr_is_surr_low (*ptr) ? null : (u16*)ptr;
-  }
-
-  return (u16*)ptr;
+  utf16_istr_sync (str + 1u);
 }
 
-#define utf16_ptri_rsync utf16_ptr_rsync
+#define utf16_istr_rseek(str) utf16_str_rseek (str)
 
 // -----------------------------------------------------------------------------
-
-static inline u16* utf16_ptr_seek (const u16* ptr, const u16* end)
-{
-  if (utf16_chr_is_surr_high (*ptr))
-  {
-    ptr += 2;
-
-    if (unlikely (ptr > end)) return null;
-  }
-  else ptr++;
-
-  if (unlikely (ptr != end))
-  {
-    return utf16_chr_is_surr_low (*ptr) ? null : (u16*)ptr;
-  }
-
-  return (u16*)ptr;
-}
-
-static inline u16* utf16_ptr_rseek (const u16* ptr, const u16* buf)
-{
-  utf16_ptr_rsync (ptr - 1, buf);
-}
-
+// Number of bytes in an implicit UTF string
 // -----------------------------------------------------------------------------
 
-static inline u16* utf16_ptri_seek (const u16* ptr)
-{
-  utf16_ptri_sync (ptr + 1);
-}
-
-#define utf16_ptri_rseek utf16_ptr_rseek
+extern size_t utf8_istr_length (const u8* str);
+extern size_t utf16_istr_length (const u16* str);
+extern size_t utf32_istr_length (const u32* str);
 
 // -----------------------------------------------------------------------------
-// Number of characters in an implicit UTF string
-// -----------------------------------------------------------------------------
-
-extern size_t utf8_stri_length (const u8* str);
-extern size_t utf16_stri_length (const u16* str);
-extern size_t utf32_stri_length (const u32* str);
-
-// -----------------------------------------------------------------------------
-// Validation and number of codepoints in a UTF string
+// Validation and number of characters in a UTF string
 // -----------------------------------------------------------------------------
 // UTF-8
 // -----------------------------------------------------------------------------
 
-extern int utf8_str_valid (const u8* in, size_t len, u8** end, size_t* num);
-extern int utf8_str_runes (const u8* in, size_t len, u8** end, size_t* num);
+extern int utf8_str_valid (const u8* buf, size_t len
+, u8** end, size_t* num);
+
+extern int utf8_str_runes (const u8* buf, size_t len
+, u8** end, size_t* num);
 
 // -----------------------------------------------------------------------------
 
-extern int utf8_stri_valid (const u8* in, u8** end, size_t* num);
-extern int utf8_stri_runes (const u8* in, u8** end, size_t* num);
+extern int utf8_istr_valid (const u8* str
+, u8** end, size_t* num);
+
+extern int utf8_istr_runes (const u8* str
+, u8** end, size_t* num);
 
 // -----------------------------------------------------------------------------
 // UTF-16
 // -----------------------------------------------------------------------------
 
-extern int utf16_str_valid (const u16* in, size_t len, u16** end, size_t* num);
-extern int utf16_str_runes (const u16* in, size_t len, u16** end, size_t* num);
+extern int utf16_str_valid (const u16* buf, size_t len
+, u16** end, size_t* num);
+
+extern int utf16_str_runes (const u16* buf, size_t len
+, u16** end, size_t* num);
 
 // -----------------------------------------------------------------------------
 
-extern int utf16_stri_valid (const u16* in, u16** end, size_t* num);
-extern int utf16_stri_runes (const u16* in, u16** end, size_t* num);
+extern int utf16_istr_valid (const u16* str
+, u16** end, size_t* num);
+
+extern int utf16_istr_runes (const u16* str
+, u16** end, size_t* num);
 
 // -----------------------------------------------------------------------------
 // UTF-32
 // -----------------------------------------------------------------------------
 
-extern int utf32_str_valid (const u32* in, size_t len, u32** end);
-extern int utf32_stri_valid (const u32* in, u32** end);
+extern int utf32_str_valid (const u32* buf
+, size_t len, u32** end);
+
+extern int utf32_istr_valid (const u32* str
+, u32** end);
 
 // -----------------------------------------------------------------------------
 // Conversion
@@ -381,97 +555,133 @@ extern int utf32_stri_valid (const u32* in, u32** end);
 // UTF-8 to UTF-16
 // -----------------------------------------------------------------------------
 
-extern int utf8_str_to16 (const u8* restrict in, size_t len, u16* restrict out
-, size_t size, u8** end, size_t* num);
-
-extern int utf8_str_to16_fast (const u8* restrict in, size_t len
-, u16* restrict out, size_t size, u8** end, size_t* num);
-
-extern int utf8_stri_to16 (const u8* restrict in, u16* restrict out, size_t size
+extern int utf8_str_to16 (const u8* restrict in, size_t len
+, u16* restrict out, size_t size
 , u8** end, size_t* num);
 
-extern int utf8_stri_to16_fast (const u8* restrict in, u16* restrict out
-, size_t size, u8** end, size_t* num);
+extern int utf8_str_to16_fast (const u8* restrict in, size_t len
+, u16* restrict out, size_t size
+, u8** end, size_t* num);
+
+// -----------------------------------------------------------------------------
+
+extern int utf8_istr_to16 (const u8* restrict in
+, u16* restrict out, size_t size
+, u8** end, size_t* num);
+
+extern int utf8_istr_to16_fast (const u8* restrict in
+, u16* restrict out, size_t size
+, u8** end, size_t* num);
 
 // -----------------------------------------------------------------------------
 // UTF-8 to UTF-32
 // -----------------------------------------------------------------------------
 
-extern int utf8_str_to32 (const u8* restrict in, size_t len, u32* restrict out
-, size_t size, u8** end, size_t* num);
-
-extern int utf8_str_to32_fast (const u8* restrict in, size_t len
-, u32* restrict out, size_t size, u8** end, size_t* num);
-
-extern int utf8_stri_to32 (const u8* restrict in, u32* restrict out, size_t size
+extern int utf8_str_to32 (const u8* restrict in, size_t len
+, u32* restrict out, size_t size
 , u8** end, size_t* num);
 
-extern int utf8_stri_to32_fast (const u8* restrict in, u32* restrict out
-, size_t size, u8** end, size_t* num);
+extern int utf8_str_to32_fast (const u8* restrict in, size_t len
+, u32* restrict out, size_t size
+, u8** end, size_t* num);
+
+// -----------------------------------------------------------------------------
+
+extern int utf8_istr_to32 (const u8* restrict in
+, u32* restrict out, size_t size
+, u8** end, size_t* num);
+
+extern int utf8_istr_to32_fast (const u8* restrict in
+, u32* restrict out, size_t size
+, u8** end, size_t* num);
 
 // -----------------------------------------------------------------------------
 // UTF-16 to UTF-8
 // -----------------------------------------------------------------------------
 
-extern int utf16_str_to8 (const u16* restrict in, size_t len, u8* restrict out
-, size_t size, u16** end, size_t* num);
-
-extern int utf16_str_to8_fast (const u16* restrict in, size_t len
-, u8* restrict out, size_t size, u16** end, size_t* num);
-
-extern int utf16_stri_to8 (const u16* restrict in, u8* restrict out, size_t size
+extern int utf16_str_to8 (const u16* restrict in, size_t len
+, u8* restrict out, size_t size
 , u16** end, size_t* num);
 
-extern int utf16_stri_to8_fast (const u16* restrict in, u8* restrict out
-, size_t size, u16** end, size_t* num);
+extern int utf16_str_to8_fast (const u16* restrict in, size_t len
+, u8* restrict out, size_t size
+, u16** end, size_t* num);
+
+// -----------------------------------------------------------------------------
+
+extern int utf16_istr_to8 (const u16* restrict in
+, u8* restrict out, size_t size
+, u16** end, size_t* num);
+
+extern int utf16_istr_to8_fast (const u16* restrict in
+, u8* restrict out, size_t size
+, u16** end, size_t* num);
 
 // -----------------------------------------------------------------------------
 // UTF-16 to UTF-32
 // -----------------------------------------------------------------------------
 
-extern int utf16_str_to32 (const u16* restrict in, size_t len, u32* restrict out
-, size_t size, u16** end, size_t* num);
+extern int utf16_str_to32 (const u16* restrict in, size_t len
+, u32* restrict out, size_t size
+, u16** end, size_t* num);
 
 extern int utf16_str_to32_fast (const u16* restrict in, size_t len
-, u32* restrict out, size_t size, u16** end, size_t* num);
+, u32* restrict out, size_t size
+, u16** end, size_t* num);
 
-extern int utf16_stri_to32 (const u16* restrict in, u32* restrict out
-, size_t size, u16** end, size_t* num);
+// -----------------------------------------------------------------------------
 
-extern int utf16_stri_to32_fast (const u16* restrict in, u32* restrict out
-, size_t size, u16** end, size_t* num);
+extern int utf16_istr_to32 (const u16* restrict in
+, u32* restrict out, size_t size
+, u16** end, size_t* num);
+
+extern int utf16_istr_to32_fast (const u16* restrict in
+, u32* restrict out, size_t size
+, u16** end, size_t* num);
 
 // -----------------------------------------------------------------------------
 // UTF-32 to UTF-8
 // -----------------------------------------------------------------------------
 
-extern int utf32_str_to8 (const u32* restrict in, size_t len, u8* restrict out
-, size_t size, u32** end, size_t* num);
-
-extern int utf32_str_to8_fast (const u32* restrict in, size_t len
-, u8* restrict out, size_t size, u32** end, size_t* num);
-
-extern int utf32_stri_to8 (const u32* restrict in, u8* restrict out, size_t size
+extern int utf32_str_to8 (const u32* restrict in, size_t len
+, u8* restrict out, size_t size
 , u32** end, size_t* num);
 
-extern int utf32_stri_to8_fast (const u32* restrict in, u8* restrict out
-, size_t size, u32** end, size_t* num);
+extern int utf32_str_to8_fast (const u32* restrict in, size_t len
+, u8* restrict out, size_t size
+, u32** end, size_t* num);
+
+// -----------------------------------------------------------------------------
+
+extern int utf32_istr_to8 (const u32* restrict in
+, u8* restrict out, size_t size
+, u32** end, size_t* num);
+
+extern int utf32_istr_to8_fast (const u32* restrict in
+, u8* restrict out, size_t size
+, u32** end, size_t* num);
 
 // -----------------------------------------------------------------------------
 // UTF-32 to UTF-16
 // -----------------------------------------------------------------------------
 
-extern int utf32_str_to16 (const u32* restrict in, size_t len, u16* restrict out
-, size_t size, u32** end, size_t* num);
+extern int utf32_str_to16 (const u32* restrict in, size_t len
+, u16* restrict out, size_t size
+, u32** end, size_t* num);
 
 extern int utf32_str_to16_fast (const u32* restrict in, size_t len
-, u16* restrict out, size_t size, u32** end, size_t* num);
+, u16* restrict out, size_t size
+, u32** end, size_t* num);
 
-extern int utf32_stri_to16 (const u32* restrict in, u16* restrict out
-, size_t size, u32** end, size_t* num);
+// -----------------------------------------------------------------------------
 
-extern int utf32_stri_to16_fast (const u32* restrict in, u16* restrict out
-, size_t size, u32** end, size_t* num);
+extern int utf32_istr_to16 (const u32* restrict in
+, u16* restrict out, size_t size
+, u32** end, size_t* num);
+
+extern int utf32_istr_to16_fast (const u32* restrict in
+, u16* restrict out, size_t size
+, u32** end, size_t* num);
 
 // -----------------------------------------------------------------------------
 // UTF byte order swapping
@@ -479,15 +689,15 @@ extern int utf32_stri_to16_fast (const u32* restrict in, u16* restrict out
 // UTF-16LE to UTF-16BE and vice versa
 // -----------------------------------------------------------------------------
 
-extern void utf16_str_bswap (u16* str, size_t len);
-extern u16* utf16_stri_bswap (u16* str);
+extern void utf16_str_bswap (u16* buf, size_t len);
+extern u16* utf16_istr_bswap (u16* str);
 
 // -----------------------------------------------------------------------------
 // UTF-32LE to UTF-32BE and vice versa
 // -----------------------------------------------------------------------------
 
-extern void utf32_str_bswap (u32* str, size_t len);
-extern u32* utf32_stri_bswap (u32* str);
+extern void utf32_str_bswap (u32* buf, size_t len);
+extern u32* utf32_istr_bswap (u32* str);
 
 // -----------------------------------------------------------------------------
 

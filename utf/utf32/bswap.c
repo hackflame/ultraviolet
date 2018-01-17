@@ -1,61 +1,22 @@
 // =============================================================================
-// <utf32/utf32bswap.c>
-//
-// UTF-32 byte-swap template.
+// <utf/utf32/bswap.c>
 //
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
 
-if (true)
+#include "../intro.h"
+
+// -----------------------------------------------------------------------------
+
 {
-  u32* restrict s = str;
+  u32* s = str;
 
 #if T(EXPLICIT)
-  const u32* restrict e = str + len;
+  const u32* e = str + len;
 #endif
 
-#if CPU(SSE2)
-  // Align to 16-byte boundaries
-  const u32* restrict b = ptr_align_ceil (16u, s);
-
-  #if T(EXPLICIT)
-    const u32* restrict p = ptr_align_floor (16u, e);
-    if (unlikely (b >= p)) goto outro;
-  #endif
-
-  while (s != b)
-  {
-    register u32 c = *s;
-
-  #if !T(EXPLICIT)
-    if (unlikely (c == '\0')) goto done;
-  #endif
-
-    *s++ = bswap32 (c);
-  }
-
-  // Process 4 characters at once using SSE
-  #if T(EXPLICIT)
-    while (s != p)
-  #else
-    while (true)
-  #endif
-  {
-    // Get the input vector
-    xi128 xs = _mm_load_si128 ((const xi128*)s);
-
-  #if !T(EXPLICIT)
-    // Check for null-terminating character
-    if (unlikely (_mm_movemask_epi8 (_mm_cmpeq_epi32 (xs, _mm_setzero_si128())) != 0)) break;
-  #endif
-
-    // Change the endianness and store the result vector back
-    _mm_store_si128 ((xi128*)s, sse_bswap32 (xs));
-
-    s += 4;
-  }
-
-outro:
+#if T(UTF32_BSWAP_SIMD)
+  #include T_UTF32_BSWAP_SIMD
 #endif
 
 #if T(EXPLICIT)
@@ -67,10 +28,11 @@ outro:
     register u32 c = *s;
 
 #if !T(EXPLICIT)
-    if (unlikely (c == '\0')) break;
+    if (unlikely (c == (uint)'\0')) break;
 #endif
 
-    *s++ = bswap32 (c);
+    *s = bswap32 (c);
+    s++;
   }
 
 done:;
@@ -82,3 +44,7 @@ done:;
 // -----------------------------------------------------------------------------
 
 #undef T_EXPLICIT
+
+// -----------------------------------------------------------------------------
+
+#include "../outro.h"
