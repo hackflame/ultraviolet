@@ -30,12 +30,7 @@
 
 #if T(VALID)
     // Check for UTF-16 surrogate character
-    if (unlikely (utf16_byte_is_surr (c)))
-    {
-invalid:
-      *end = (u32*)i;
-      return INT_MIN;
-    }
+    if (unlikely (utf16_byte_is_surr (c))) goto invalid;
 
     // Check for Unicode non-character
     if (unlikely (utf16_chr_is_non (c))) goto invalid;
@@ -58,8 +53,11 @@ invalid:
 
 done:
   *end = (u32*)i;
-
   return 0;
+
+invalid:
+  *end = (u32*)i;
+  return INT_MIN;
 }
 
 // -----------------------------------------------------------------------------
