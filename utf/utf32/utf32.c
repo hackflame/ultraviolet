@@ -56,6 +56,7 @@ invalid:
 #endif
   }
 
+done:
   *end = (u32*)i;
 
   return 0;

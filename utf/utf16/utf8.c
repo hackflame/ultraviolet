@@ -178,6 +178,7 @@
 #endif
   }
 
+done:
   *end = (u16*)i;
 
 #if T(SIZE)

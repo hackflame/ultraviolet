@@ -166,6 +166,7 @@ invalid:
 #endif
   }
 
+done:
   *end = (u32*)i;
 
 #if T(SIZE)

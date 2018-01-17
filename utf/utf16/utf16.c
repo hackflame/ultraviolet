@@ -98,6 +98,7 @@
 #endif
   }
 
+done:
   *end = (u16*)i;
   *num = pts;
 
