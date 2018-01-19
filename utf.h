@@ -32,8 +32,8 @@
 // Maximum multibyte sequence lengths
 // -----------------------------------------------------------------------------
 
-#define UTF8_SEQ_MAX  4u
-#define UTF16_SEQ_MAX 2u
+#define UTF8_SEQ_LEN_MAX  4u
+#define UTF16_SEQ_LEN_MAX 2u
 
 // -----------------------------------------------------------------------------
 // http://unicode.org/faq/utf_bom.html
@@ -45,8 +45,8 @@
 #define UTF16_LOW_SURR_BEG 0xDC00u
 #define UTF16_LOW_SURR_END 0xDFFFu
 
-#define UTF16_LEAD_OFFSET (UTF16_HIGH_SURR_BEG - (0x10000u >> 10))
-#define UTF16_SURR_OFFSET (0x10000u - ((uf32)UTF16_HIGH_SURR_BEG << 10) - UTF16_LOW_SURR_BEG)
+#define UTF16_LEAD_OFF (UTF16_HIGH_SURR_BEG - (0x10000u >> 10))
+#define UTF16_SURR_OFF (0x10000u - ((uf32)UTF16_HIGH_SURR_BEG << 10) - UTF16_LOW_SURR_BEG)
 
 // =============================================================================
 // Types
@@ -299,7 +299,7 @@ typedef const utf32_chr_t* utf32_istr_const_t;
 // Construct a UTF-16 surrogate pair from a UTF-32 character
 // -----------------------------------------------------------------------------
 
-#define utf16_make_surr_high(c) (((c) >> 10) + UTF16_LEAD_OFFSET)
+#define utf16_make_surr_high(c) (((c) >> 10) + UTF16_LEAD_OFF)
 #define utf16_make_surr_low(c) (((c) & 0x3FFu) | UTF16_LOW_SURR_BEG)
 
 // -----------------------------------------------------------------------------
