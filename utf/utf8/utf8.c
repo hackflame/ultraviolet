@@ -4,7 +4,7 @@
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
 
-#include "../intro.h"
+#include <quantum/structures/string/intro.h>
 
 // -----------------------------------------------------------------------------
 
@@ -275,11 +275,13 @@ invalid:
 
   return INT_MIN;
 
+#if T(EXPLICIT)
 too_short:
   *end = (u8*)i;
   *num = pts;
 
   return t;
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -289,4 +291,4 @@ too_short:
 
 // -----------------------------------------------------------------------------
 
-#include "../outro.h"
+#include <quantum/structures/string/outro.h>
