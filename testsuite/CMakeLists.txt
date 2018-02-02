@@ -6,7 +6,7 @@
 
 cmake_minimum_required (VERSION 3.0.2)
 
-project (utf)
+project (ultraviolet)
 
 # Directories
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
@@ -44,11 +44,11 @@ if (WIN32)
 endif()
 
 # Executable
-add_executable (${PROJECT_NAME} ${UTF_C} ${UTF8_C} ${UTF16_C} ${UTF32_C})
+add_executable (utf ${UTF_C} ${UTF8_C} ${UTF16_C} ${UTF32_C})
 
-set_target_properties (${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE ${LINK_FLAGS_RELEASE})
-set_target_properties (${PROJECT_NAME} PROPERTIES LINK_FLAGS_DEBUG ${LINK_FLAGS_DEBUG})
+set_target_properties (utf PROPERTIES LINK_FLAGS_RELEASE ${LINK_FLAGS_RELEASE})
+set_target_properties (utf PROPERTIES LINK_FLAGS_DEBUG ${LINK_FLAGS_DEBUG})
 
 if (WIN32)
-  target_link_libraries (${PROJECT_NAME} mingw32 msvcr120)
+  target_link_libraries (utf mingw32 msvcr120)
 endif()

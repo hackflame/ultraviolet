@@ -16,7 +16,7 @@
   T_utf_in_t* ptr = (T_utf_in_t*)in;
   insz /= T_utf_in_sz;
 
-  if (bswp_in) T_utf_in_bswap_fn (ptr, insz);
+  if (bswp_in) T_utf_in_bswap_fun (ptr, insz);
 
   T_utf_in_t* pos;
   size_t outsz;
@@ -25,13 +25,13 @@
 
   while (true)
   {
-    int ret = T_utf_conv_fn (ptr, sz, (T_utf_out_t*)out
+    int ret = T_utf_conv_fun (ptr, sz, (T_utf_out_t*)out
     , BUF_SIZE / T_utf_out_sz, &pos, &outsz);
 
     size_t n = (size_t)(pos - ptr);
     num += n;
 
-    if (bswp_out) T_utf_out_bswap_fn ((T_utf_out_t*)out, outsz);
+    if (bswp_out) T_utf_out_bswap_fun ((T_utf_out_t*)out, outsz);
 
     outsz *= T_utf_out_sz;
 
@@ -66,10 +66,10 @@
 
 #undef T_utf_in_t
 #undef T_utf_in_sz
-#undef T_utf_in_bswap_fn
+#undef T_utf_in_bswap_fun
 
 #undef T_utf_out_t
 #undef T_utf_out_sz
-#undef T_utf_out_bswap_fn
+#undef T_utf_out_bswap_fun
 
-#undef T_utf_conv_fn
+#undef T_utf_conv_fun

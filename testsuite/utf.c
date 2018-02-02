@@ -12,14 +12,10 @@
 
 #include <quantum/core.h>
 
+#include <quantum/main.h>
 #include <quantum/integer.h>
 #include <quantum/string.h>
 #include <quantum/io.h>
-#include <quantum/xchar.h>
-
-#if OS(WIN32)
-  #include <quantum/windows.h>
-#endif
 
 #include <utf.h>
 
@@ -27,11 +23,11 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-#if (BUF_SIZE == 0)
+#if !BUF_SIZE
   #define BUF_SIZE 4096u
 #endif
 
-#if (BUF_SIZE < 256) || (BUF_SIZE % 4)
+#if (BUF_SIZE < 256u) || (BUF_SIZE % 4u)
   #error "Invalid definition of `BUF_SIZE`"
 #endif
 
@@ -105,19 +101,19 @@ static bool bom_eof;
 static noreturn void error_io (void)
 {
   fprintf (stderr, "%s.\n", "I/O error");
-  exit (EXIT_FAILURE);
+  exit (exit_err);
 }
 
 static noreturn void error_input (size_t pos)
 {
   fprintf (stderr, "%s [%" PRIuSIZE "].\n", "Invalid input", pos);
-  exit (EXIT_FAILURE);
+  exit (exit_err);
 }
 
 static noreturn void error_unknown (void)
 {
   fprintf (stderr, "%s.\n", "Unknown error");
-  exit (EXIT_FAILURE);
+  exit (exit_err);
 }
 
 // -----------------------------------------------------------------------------
@@ -153,9 +149,9 @@ static void validate (const utf_enc_t enc, bool bswp_in, bool bswp_out
     {
       #define T_utf_in_t u8
       #define T_utf_in_sz 1u
-      #define T_utf_in_bswap_fn fn_nop_va
+      #define T_utf_in_bswap_fun fun_nop_va
 
-      #define T_utf_valid_fn utf8_str_valid
+      #define T_utf_valid_fun utf8_str_valid
 
       #include "templates/validate.c"
     }
@@ -163,9 +159,9 @@ static void validate (const utf_enc_t enc, bool bswp_in, bool bswp_out
     {
       #define T_utf_in_t u16
       #define T_utf_in_sz 2u
-      #define T_utf_in_bswap_fn utf16_str_bswap
+      #define T_utf_in_bswap_fun utf16_str_bswap
 
-      #define T_utf_valid_fn utf16_str_valid
+      #define T_utf_valid_fun utf16_str_valid
 
       #include "templates/validate.c"
     }
@@ -173,9 +169,9 @@ static void validate (const utf_enc_t enc, bool bswp_in, bool bswp_out
     {
       #define T_utf_in_t u32
       #define T_utf_in_sz 4u
-      #define T_utf_in_bswap_fn utf32_str_bswap
+      #define T_utf_in_bswap_fun utf32_str_bswap
 
-      #define T_utf_valid_fn(in, len, end, runes) utf32_str_valid (in, len, end)
+      #define T_utf_valid_fun(in, len, end, runes) utf32_str_valid (in, len, end)
 
       #include "templates/validate.c"
     }
@@ -224,13 +220,13 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
     {
       #define T_utf_in_t u8
       #define T_utf_in_sz 1u
-      #define T_utf_in_bswap_fn fn_nop_va
+      #define T_utf_in_bswap_fun fun_nop_va
 
       #define T_utf_out_t u16
       #define T_utf_out_sz 2u
-      #define T_utf_out_bswap_fn utf16_str_bswap
+      #define T_utf_out_bswap_fun utf16_str_bswap
 
-      #define T_utf_conv_fn utf8_str_to16
+      #define T_utf_conv_fun utf8_str_to16
 
       #include "templates/convert.c"
     }
@@ -238,13 +234,13 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
     {
       #define T_utf_in_t u8
       #define T_utf_in_sz 1u
-      #define T_utf_in_bswap_fn fn_nop_va
+      #define T_utf_in_bswap_fun fun_nop_va
 
       #define T_utf_out_t u32
       #define T_utf_out_sz 4u
-      #define T_utf_out_bswap_fn utf32_str_bswap
+      #define T_utf_out_bswap_fun utf32_str_bswap
 
-      #define T_utf_conv_fn utf8_str_to32
+      #define T_utf_conv_fun utf8_str_to32
 
       #include "templates/convert.c"
     }
@@ -252,13 +248,13 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
     {
       #define T_utf_in_t u16
       #define T_utf_in_sz 2u
-      #define T_utf_in_bswap_fn utf16_str_bswap
+      #define T_utf_in_bswap_fun utf16_str_bswap
 
       #define T_utf_out_t u8
       #define T_utf_out_sz 1u
-      #define T_utf_out_bswap_fn fn_nop_va
+      #define T_utf_out_bswap_fun fun_nop_va
 
-      #define T_utf_conv_fn utf16_str_to8
+      #define T_utf_conv_fun utf16_str_to8
 
       #include "templates/convert.c"
     }
@@ -266,13 +262,13 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
     {
       #define T_utf_in_t u16
       #define T_utf_in_sz 2u
-      #define T_utf_in_bswap_fn utf16_str_bswap
+      #define T_utf_in_bswap_fun utf16_str_bswap
 
       #define T_utf_out_t u32
       #define T_utf_out_sz 4u
-      #define T_utf_out_bswap_fn utf32_str_bswap
+      #define T_utf_out_bswap_fun utf32_str_bswap
 
-      #define T_utf_conv_fn utf16_str_to32
+      #define T_utf_conv_fun utf16_str_to32
 
       #include "templates/convert.c"
     }
@@ -280,13 +276,13 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
     {
       #define T_utf_in_t u32
       #define T_utf_in_sz 4u
-      #define T_utf_in_bswap_fn utf32_str_bswap
+      #define T_utf_in_bswap_fun utf32_str_bswap
 
       #define T_utf_out_t u8
       #define T_utf_out_sz 1u
-      #define T_utf_out_bswap_fn fn_nop_va
+      #define T_utf_out_bswap_fun fun_nop_va
 
-      #define T_utf_conv_fn utf32_str_to8
+      #define T_utf_conv_fun utf32_str_to8
 
       #include "templates/convert.c"
     }
@@ -294,13 +290,13 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
     {
       #define T_utf_in_t u32
       #define T_utf_in_sz 4u
-      #define T_utf_in_bswap_fn utf32_str_bswap
+      #define T_utf_in_bswap_fun utf32_str_bswap
 
       #define T_utf_out_t u16
       #define T_utf_out_sz 2u
-      #define T_utf_out_bswap_fn utf16_str_bswap
+      #define T_utf_out_bswap_fun utf16_str_bswap
 
-      #define T_utf_conv_fn utf32_str_to16
+      #define T_utf_conv_fun utf32_str_to16
 
       #include "templates/convert.c"
     }
@@ -344,28 +340,10 @@ static void mark (utf_enc_t enc, bool bswp_out)
   }
 }
 
-// -----------------------------------------------------------------------------
+// =============================================================================
 
-int xmain (int argc, xchar_t** xargv)
+int quantum (const main_t* restrict argm, char_t** restrict argv, uint argc)
 {
-#if OS(WIN32) && defined(DEBUG)
-  SetErrorMode (SetErrorMode (0) | SEM_NOGPFAULTERRORBOX);
-#endif
-
-  chr_t* argvv[argc];
-  chr_t* argv8 = ixstr_to_utf8_set_mngd (argvv, (const xchr_t* const*)xargv, argc);
-
-  if (argv8 == null)
-  {
-#if OS(WIN32)
-    win_error_print ("UTF-8");
-#endif
-
-    return EXIT_FAILURE;
-  }
-
-  chr_t** argv = argvv;
-
   // Parse command line arguments
   char* app = *argv;
   bool help = false;
@@ -416,7 +394,7 @@ error_help:
 "    no:   discard BOM.\n"
     );
 
-    return help ? EXIT_SUCCESS : EXIT_FAILURE;
+    return help ? exit_ok : exit_err;
   }
 
   utf_enc_t in = utf_auto;
@@ -558,11 +536,11 @@ error_help:
 
 #if OS(WIN32)
   // Put both streams into binary mode
-  if (!io_file_flush (stdin)) error_io();
-  if (setmode (IO_FD_STDIN, O_BINARY) == -1) error_io();
+  if (!io_file_flush (io_file_stdin)) error_io();
+  if (setmode (io_fd_stdin, O_BINARY) == -1) error_io();
 
-  if (!io_file_flush (stdout)) error_io();
-  if (setmode (IO_FD_STDOUT, O_BINARY) == -1) error_io();
+  if (!io_file_flush (io_file_stdout)) error_io();
+  if (setmode (io_fd_stdout, O_BINARY) == -1) error_io();
 #endif
 
   // Detect the input encoding
@@ -687,5 +665,9 @@ assume_utf8:
   }
 
 done:
-  return EXIT_SUCCESS;
+  return exit_ok;
 }
+
+// -----------------------------------------------------------------------------
+
+#include <quantum/main.c>
