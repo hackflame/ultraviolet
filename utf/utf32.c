@@ -31,8 +31,8 @@ size_t utf32_istr_length (const u32* str)
 // UTF-32
 // -----------------------------------------------------------------------------
 
-int utf32_str_valid (const u32* in, size_t len
-, u32** end)
+int utf32_str_valid (const u32* restrict in, size_t len
+, u32** restrict end)
 {
   #define T_EXPLICIT
   #define T_VALID
@@ -40,8 +40,8 @@ int utf32_str_valid (const u32* in, size_t len
   #include "utf32/utf32.c"
 }
 
-int utf32_istr_valid (const u32* in
-, u32** end)
+int utf32_istr_valid (const u32* restrict in
+, u32** restrict end)
 {
   #define T_VALID
 
@@ -56,7 +56,7 @@ int utf32_istr_valid (const u32* in
 
 int utf32_str_to8 (const u32* restrict in, size_t len
 , u8* restrict out, size_t size
-, u32** end, size_t* num)
+, u32** restrict end, size_t* restrict num)
 {
   #define T_EXPLICIT
   #define T_VALID
@@ -66,7 +66,7 @@ int utf32_str_to8 (const u32* restrict in, size_t len
 
 int utf32_str_to8_fast (const u32* restrict in, size_t len
 , u8* restrict out, size_t size
-, u32** end, size_t* num)
+, u32** restrict end, size_t* restrict num)
 {
   #define T_EXPLICIT
 
@@ -77,7 +77,7 @@ int utf32_str_to8_fast (const u32* restrict in, size_t len
 
 int utf32_istr_to8 (const u32* restrict in
 , u8* restrict out, size_t size
-, u32** end, size_t* num)
+, u32** restrict end, size_t* restrict num)
 {
   #define T_VALID
 
@@ -86,7 +86,7 @@ int utf32_istr_to8 (const u32* restrict in
 
 int utf32_istr_to8_fast (const u32* restrict in
 , u8* restrict out, size_t size
-, u32** end, size_t* num)
+, u32** restrict end, size_t* restrict num)
 {
   #include "utf32/utf8.c"
 }
@@ -97,7 +97,7 @@ int utf32_istr_to8_fast (const u32* restrict in
 
 int utf32_str_to16 (const u32* restrict in, size_t len
 , u16* restrict out, size_t size
-, u32** end, size_t* num)
+, u32** restrict end, size_t* restrict num)
 {
   #define T_EXPLICIT
   #define T_VALID
@@ -107,7 +107,7 @@ int utf32_str_to16 (const u32* restrict in, size_t len
 
 int utf32_str_to16_fast (const u32* restrict in, size_t len
 , u16* restrict out, size_t size
-, u32** end, size_t* num)
+, u32** restrict end, size_t* restrict num)
 {
   #define T_EXPLICIT
 
@@ -118,7 +118,7 @@ int utf32_str_to16_fast (const u32* restrict in, size_t len
 
 int utf32_istr_to16 (const u32* restrict in
 , u16* restrict out, size_t size
-, u32** end, size_t* num)
+, u32** restrict end, size_t* restrict num)
 {
   #define T_VALID
 
@@ -127,7 +127,7 @@ int utf32_istr_to16 (const u32* restrict in
 
 int utf32_istr_to16_fast (const u32* restrict in
 , u16* restrict out, size_t size
-, u32** end, size_t* num)
+, u32** restrict end, size_t* restrict num)
 {
   #include "utf32/utf16.c"
 }

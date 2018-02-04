@@ -94,7 +94,7 @@ static const utf8_str_const_t utf8_str_const_null = (utf8_str_const_t){0};
 #define utf8_str_const_from_cstr(str) utf8_str_const_make ((str), cstrlen (str))
 
 // -----------------------------------------------------------------------------
-// These typedefs should not be used.
+// These typedefs (`utfn_istr_t` and `utfn_istr_const_t`) should not be used.
 //
 // They are provided only for self-documentation purposes and completeness sake.
 // -----------------------------------------------------------------------------
@@ -507,47 +507,47 @@ extern size_t utf32_istr_length (const u32* str);
 // UTF-8
 // -----------------------------------------------------------------------------
 
-extern int utf8_str_valid (const u8* buf, size_t len
-, u8** end, size_t* num);
+extern int utf8_str_valid (const u8* restrict buf, size_t len
+, u8** restrict end, size_t* restrict num);
 
-extern int utf8_str_runes (const u8* buf, size_t len
-, u8** end, size_t* num);
+extern int utf8_str_runes (const u8* restrict buf, size_t len
+, u8** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 
-extern int utf8_istr_valid (const u8* str
-, u8** end, size_t* num);
+extern int utf8_istr_valid (const u8* restrict str
+, u8** restrict end, size_t* restrict num);
 
-extern int utf8_istr_runes (const u8* str
-, u8** end, size_t* num);
+extern int utf8_istr_runes (const u8* restrict str
+, u8** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 // UTF-16
 // -----------------------------------------------------------------------------
 
-extern int utf16_str_valid (const u16* buf, size_t len
-, u16** end, size_t* num);
+extern int utf16_str_valid (const u16* restrict buf, size_t len
+, u16** restrict end, size_t* restrict num);
 
-extern int utf16_str_runes (const u16* buf, size_t len
-, u16** end, size_t* num);
+extern int utf16_str_runes (const u16* restrict buf, size_t len
+, u16** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 
-extern int utf16_istr_valid (const u16* str
-, u16** end, size_t* num);
+extern int utf16_istr_valid (const u16* restrict str
+, u16** restrict end, size_t* restrict num);
 
-extern int utf16_istr_runes (const u16* str
-, u16** end, size_t* num);
+extern int utf16_istr_runes (const u16* restrict str
+, u16** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 // UTF-32
 // -----------------------------------------------------------------------------
 
-extern int utf32_str_valid (const u32* buf
-, size_t len, u32** end);
+extern int utf32_str_valid (const u32* restrict buf
+, size_t len, u32** restrict end);
 
-extern int utf32_istr_valid (const u32* str
-, u32** end);
+extern int utf32_istr_valid (const u32* restrict str
+, u32** restrict end);
 
 // -----------------------------------------------------------------------------
 // Conversion
@@ -557,21 +557,21 @@ extern int utf32_istr_valid (const u32* str
 
 extern int utf8_str_to16 (const u8* restrict in, size_t len
 , u16* restrict out, size_t size
-, u8** end, size_t* num);
+, u8** restrict end, size_t* restrict num);
 
 extern int utf8_str_to16_fast (const u8* restrict in, size_t len
 , u16* restrict out, size_t size
-, u8** end, size_t* num);
+, u8** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 
 extern int utf8_istr_to16 (const u8* restrict in
 , u16* restrict out, size_t size
-, u8** end, size_t* num);
+, u8** restrict end, size_t* restrict num);
 
 extern int utf8_istr_to16_fast (const u8* restrict in
 , u16* restrict out, size_t size
-, u8** end, size_t* num);
+, u8** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 // UTF-8 to UTF-32
@@ -579,21 +579,21 @@ extern int utf8_istr_to16_fast (const u8* restrict in
 
 extern int utf8_str_to32 (const u8* restrict in, size_t len
 , u32* restrict out, size_t size
-, u8** end, size_t* num);
+, u8** restrict end, size_t* restrict num);
 
 extern int utf8_str_to32_fast (const u8* restrict in, size_t len
 , u32* restrict out, size_t size
-, u8** end, size_t* num);
+, u8** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 
 extern int utf8_istr_to32 (const u8* restrict in
 , u32* restrict out, size_t size
-, u8** end, size_t* num);
+, u8** restrict end, size_t* restrict num);
 
 extern int utf8_istr_to32_fast (const u8* restrict in
 , u32* restrict out, size_t size
-, u8** end, size_t* num);
+, u8** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 // UTF-16 to UTF-8
@@ -601,21 +601,21 @@ extern int utf8_istr_to32_fast (const u8* restrict in
 
 extern int utf16_str_to8 (const u16* restrict in, size_t len
 , u8* restrict out, size_t size
-, u16** end, size_t* num);
+, u16** restrict end, size_t* restrict num);
 
 extern int utf16_str_to8_fast (const u16* restrict in, size_t len
 , u8* restrict out, size_t size
-, u16** end, size_t* num);
+, u16** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 
 extern int utf16_istr_to8 (const u16* restrict in
 , u8* restrict out, size_t size
-, u16** end, size_t* num);
+, u16** restrict end, size_t* restrict num);
 
 extern int utf16_istr_to8_fast (const u16* restrict in
 , u8* restrict out, size_t size
-, u16** end, size_t* num);
+, u16** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 // UTF-16 to UTF-32
@@ -623,21 +623,21 @@ extern int utf16_istr_to8_fast (const u16* restrict in
 
 extern int utf16_str_to32 (const u16* restrict in, size_t len
 , u32* restrict out, size_t size
-, u16** end, size_t* num);
+, u16** restrict end, size_t* restrict num);
 
 extern int utf16_str_to32_fast (const u16* restrict in, size_t len
 , u32* restrict out, size_t size
-, u16** end, size_t* num);
+, u16** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 
 extern int utf16_istr_to32 (const u16* restrict in
 , u32* restrict out, size_t size
-, u16** end, size_t* num);
+, u16** restrict end, size_t* restrict num);
 
 extern int utf16_istr_to32_fast (const u16* restrict in
 , u32* restrict out, size_t size
-, u16** end, size_t* num);
+, u16** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 // UTF-32 to UTF-8
@@ -645,21 +645,21 @@ extern int utf16_istr_to32_fast (const u16* restrict in
 
 extern int utf32_str_to8 (const u32* restrict in, size_t len
 , u8* restrict out, size_t size
-, u32** end, size_t* num);
+, u32** restrict end, size_t* restrict num);
 
 extern int utf32_str_to8_fast (const u32* restrict in, size_t len
 , u8* restrict out, size_t size
-, u32** end, size_t* num);
+, u32** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 
 extern int utf32_istr_to8 (const u32* restrict in
 , u8* restrict out, size_t size
-, u32** end, size_t* num);
+, u32** restrict end, size_t* restrict num);
 
 extern int utf32_istr_to8_fast (const u32* restrict in
 , u8* restrict out, size_t size
-, u32** end, size_t* num);
+, u32** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 // UTF-32 to UTF-16
@@ -667,21 +667,21 @@ extern int utf32_istr_to8_fast (const u32* restrict in
 
 extern int utf32_str_to16 (const u32* restrict in, size_t len
 , u16* restrict out, size_t size
-, u32** end, size_t* num);
+, u32** restrict end, size_t* restrict num);
 
 extern int utf32_str_to16_fast (const u32* restrict in, size_t len
 , u16* restrict out, size_t size
-, u32** end, size_t* num);
+, u32** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 
 extern int utf32_istr_to16 (const u32* restrict in
 , u16* restrict out, size_t size
-, u32** end, size_t* num);
+, u32** restrict end, size_t* restrict num);
 
 extern int utf32_istr_to16_fast (const u32* restrict in
 , u16* restrict out, size_t size
-, u32** end, size_t* num);
+, u32** restrict end, size_t* restrict num);
 
 // -----------------------------------------------------------------------------
 // UTF byte order swapping
