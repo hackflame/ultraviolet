@@ -9,7 +9,7 @@ cmake_minimum_required (VERSION 3.0.2)
 project (ultraviolet)
 
 # Directories
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 
 set (QUANTUM_DIR ${QUANTUM})
 string (REPLACE "\\" "/" QUANTUM_DIR ${QUANTUM_DIR})
@@ -20,11 +20,14 @@ string (REPLACE "\\" "/" ULTRAVIOLET_DIR ${ULTRAVIOLET_DIR})
 include_directories ("${ULTRAVIOLET_DIR}")
 
 # Flags
-if (CMAKE_COMPILER_IS_GNUCC)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+  set (CMAKE_COMPILER_IS_GCC_OR_CLANG 1)
+endif()
+
+if (CMAKE_COMPILER_IS_GCC_OR_CLANG)
   set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=native -O3")
 
   set (LINK_FLAGS_RELEASE "-s")
-  set (LINK_FLAGS_DEBUG "")
 
   if (WIN32)
     set (LINK_FLAGS_RELEASE "-mconsole -municode ${LINK_FLAGS_RELEASE}")
@@ -46,8 +49,8 @@ endif()
 # Executable
 add_executable (utf ${UTF_C} ${UTF8_C} ${UTF16_C} ${UTF32_C})
 
-set_target_properties (utf PROPERTIES LINK_FLAGS_RELEASE ${LINK_FLAGS_RELEASE})
-set_target_properties (utf PROPERTIES LINK_FLAGS_DEBUG ${LINK_FLAGS_DEBUG})
+set_target_properties (utf PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE}")
+set_target_properties (utf PROPERTIES LINK_FLAGS_DEBUG "${LINK_FLAGS_DEBUG}")
 
 if (WIN32)
   target_link_libraries (utf mingw32 msvcr120)

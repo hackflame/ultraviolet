@@ -15,4 +15,6 @@ if exist converted (
   rmdir /s /q converted
 )
 
-del /q utf.exe
+del /q bin\utf.exe
+
+rmdir /q bin
