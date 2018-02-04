@@ -33,8 +33,10 @@
 
 // -----------------------------------------------------------------------------
 
-#define ARG_IN  "-in="
-#define ARG_OUT "-out="
+#define ARG_IN   "-i"
+#define ARG_OUT  "-o"
+#define ARG_BOM  "-b"
+#define ARG_HELP "-h"
 
 #define ARG_ENC_UTF8    "utf-8"
 #define ARG_ENC_UTF16   "utf-16"
@@ -44,14 +46,10 @@
 #define ARG_ENC_UTF32LE "utf-32le"
 #define ARG_ENC_UTF32BE "utf-32be"
 
-#define ARG_BOM "-bom"
-
-#define ARG_BOM_AUTO "=auto"
-#define ARG_BOM_KEEP "=keep"
-#define ARG_BOM_YES  "=yes"
-#define ARG_BOM_NO   "=no"
-
-#define ARG_HELP "-help"
+#define ARG_BOM_AUTO "auto"
+#define ARG_BOM_KEEP "keep"
+#define ARG_BOM_YES  "yes"
+#define ARG_BOM_NO   "no"
 
 // =============================================================================
 // Types
@@ -100,19 +98,19 @@ static bool bom_eof;
 
 static noreturn void error_io (void)
 {
-  fprintf (stderr, "%s.\n", "I/O error");
+  fprintf (stderr, "%s\n", "I/O error");
   exit (exit_err);
 }
 
 static noreturn void error_input (size_t pos)
 {
-  fprintf (stderr, "%s [%" PRIuSIZE "].\n", "Invalid input", pos);
+  fprintf (stderr, "%s [%" PRIuSIZE "]\n", "Invalid input", pos);
   exit (exit_err);
 }
 
 static noreturn void error_unknown (void)
 {
-  fprintf (stderr, "%s.\n", "Unknown error");
+  fprintf (stderr, "%s\n", "Unknown error");
   exit (exit_err);
 }
 
@@ -345,54 +343,61 @@ static void mark (utf_enc_t enc, bool bswp_out)
 int quantum (const main_t* restrict argm, char_t** restrict argv, uint argc)
 {
   // Parse command line arguments
-  char* app = *argv;
+  char* prog = *argv;
   bool help = false;
 
-  if ((argc < 1) || (argc > 5))
+  if ((argc < 1u) || (argc > 5u))
   {
 error_args:
-    fprintf (stderr, "%s.\n", "Invalid arguments");
+    fprintf (stderr, "%s\n", "Invalid arguments");
     putchar ('\n');
 
 error_help:
-    fprintf (stderr, "Usage: %s -in=auto -out=utf-8 -bom=auto%s < input > output\n"
-    , app, help ? "" : " -help");
+    fprintf (stderr, "Usage: %s -i auto -o utf-8 -b auto%s < input > output\n"
+    , prog, help ? "" : " -h");
 
     // Print detailed usage instructions
-    if (help) putchar ('\n');
-    if (help) fprintf (stderr,
-"-in: input encoding (optional).\n"
+    if (help)
+    {
+      putchar ('\n');
+      fprintf (stderr,
+"-i: input encoding (optional).\n"
 "\n"
 "    auto: attempt to detect the input encoding by looking\n"
-"    at the byte order mark (BOM), if it's present.\n"
-"    Assume UTF-8 if it's not present.\n"
+"    at its byte order mark (BOM) if it's present.\n"
+"    Assume UTF-8 otherwise.\n"
 "\n"
-"    utf-8:    the input is encoded in UTF-8.\n"
-"    utf-16:   the input is encoded in UTF-16 (host endianness).\n"
-"    utf-16le: the input is encoded in UTF-16 (little-endian).\n"
-"    utf-16be: the input is encoded in UTF-16 (big-endian).\n"
-"    utf-32:   the input is encoded in UTF-32 (host endianness).\n"
-"    utf-32le: the input is encoded in UTF-32 (little-endian).\n"
-"    utf-32be: the input is encoded in UTF-32 (big-endian).\n"
+"    utf-8:    UTF-8.\n"
 "\n"
-"-out: output encoding (optional).\n"
+"    utf-16:   UTF-16 (host endianness).\n"
+"    utf-16le: UTF-16 (little-endian).\n"
+"    utf-16be: UTF-16 (big-endian).\n"
+"\n"
+"    utf-32:   UTF-32 (host endianness).\n"
+"    utf-32le: UTF-32 (little-endian).\n"
+"    utf-32be: UTF-32 (big-endian).\n"
+"\n"
+"-o: output encoding (optional).\n"
 "\n"
 "    none:     validate the input only.\n"
-"    utf-8:    encode the output in UTF-8.\n"
-"    utf-16:   encode the output in UTF-16 (host endianness).\n"
-"    utf-16le: encode the output in UTF-16 (little-endian).\n"
-"    utf-16be: encode the output in UTF-16 (big-endian).\n"
-"    utf-32:   encode the output in UTF-32 (host endianness).\n"
-"    utf-32le: encode the output in UTF-32 (little-endian).\n"
-"    utf-32be: encode the output in UTF-32 (big-endian).\n"
 "\n"
-"-bom: byte order mark policy (optional).\n"
+"    utf-8:    UTF-8.\n"
+"\n"
+"    utf-16:   UTF-16 (host endianness).\n"
+"    utf-16le: UTF-16 (little-endian).\n"
+"    utf-16be: UTF-16 (big-endian).\n"
+"\n"
+"    utf-32:   UTF-32 (host endianness).\n"
+"    utf-32le: UTF-32 (little-endian).\n"
+"    utf-32be: UTF-32 (big-endian).\n"
+"\n"
+"-b: byte order mark policy (optional).\n"
 "\n"
 "    auto: omit BOM for UTF-8 output, write otherwise.\n"
-"    keep: write BOM in the output if it was present in the input (UTF-8 only).\n"
+"    keep: write UTF-8 BOM if it was present in the input.\n"
 "    yes:  force writing of BOM.\n"
-"    no:   discard BOM.\n"
-    );
+"    no:   discard BOM.\n");
+    }
 
     return help ? exit_ok : exit_err;
   }
@@ -408,17 +413,22 @@ error_help:
   argc--;
   argv++;
 
-  while (argc--)
+  while (argc)
   {
     // Input encoding
-    if (istr_niequal (*argv, ARG_IN, cstrlen (ARG_IN)))
+    if (istr_iequal (*argv, ARG_IN))
     {
+      argc--;
+      argv++;
+
+      if (argc == 0) goto error_args;
+
       // UTF-8
-      if (istr_iequal (*argv + cstrlen (ARG_IN), ARG_ENC_UTF8)) in = utf8;
-      // UTF-16 (system endianness)
-      elif (istr_iequal (*argv + cstrlen (ARG_IN), ARG_ENC_UTF16)) in = utf16;
+      if (istr_iequal (*argv, ARG_ENC_UTF8)) in = utf8;
+      // UTF-16 (host endianness)
+      elif (istr_iequal (*argv, ARG_ENC_UTF16)) in = utf16;
       // UTF-16 (little-endian)
-      elif (istr_iequal (*argv + cstrlen (ARG_IN), ARG_ENC_UTF16LE))
+      elif (istr_iequal (*argv, ARG_ENC_UTF16LE))
       {
         in = utf16;
 
@@ -427,7 +437,7 @@ error_help:
 #endif
       }
       // UTF-16 (big-endian)
-      elif (istr_iequal (*argv + cstrlen (ARG_IN), ARG_ENC_UTF16BE))
+      elif (istr_iequal (*argv, ARG_ENC_UTF16BE))
       {
         in = utf16;
 
@@ -435,10 +445,10 @@ error_help:
         bswp_in = true;
 #endif
       }
-      // UTF-32 (system endianness)
-      elif (istr_iequal (*argv + cstrlen (ARG_IN), ARG_ENC_UTF32)) in = utf32;
+      // UTF-32 (host endianness)
+      elif (istr_iequal (*argv, ARG_ENC_UTF32)) in = utf32;
       // UTF-32 (little-endian)
-      elif (istr_iequal (*argv + cstrlen (ARG_IN), ARG_ENC_UTF32LE))
+      elif (istr_iequal (*argv, ARG_ENC_UTF32LE))
       {
         in = utf32;
 
@@ -447,7 +457,7 @@ error_help:
 #endif
       }
       // UTF-32 (big-endian)
-      elif (istr_iequal (*argv + cstrlen (ARG_IN), ARG_ENC_UTF32BE))
+      elif (istr_iequal (*argv, ARG_ENC_UTF32BE))
       {
         in = utf32;
 
@@ -456,18 +466,23 @@ error_help:
 #endif
       }
       // Autodetect
-      elif (istr_iequal (*argv + cstrlen (ARG_IN), ARG_BOM_AUTO)) in = utf_auto;
+      elif (istr_iequal (*argv, ARG_BOM_AUTO)) in = utf_auto;
       else goto error_args;
     }
     // Output encoding
-    elif (istr_niequal (*argv, ARG_OUT, cstrlen (ARG_OUT)))
+    elif (istr_iequal (*argv, ARG_OUT))
     {
+      argc--;
+      argv++;
+
+      if (argc == 0) goto error_args;
+
       // UTF-8
-      if (istr_iequal (*argv + cstrlen (ARG_OUT), ARG_ENC_UTF8)) out = utf8;
-      // UTF-16 (system endianness)
-      elif (istr_iequal (*argv + cstrlen (ARG_OUT), ARG_ENC_UTF16)) out = utf16;
+      if (istr_iequal (*argv, ARG_ENC_UTF8)) out = utf8;
+      // UTF-16 (host endianness)
+      elif (istr_iequal (*argv, ARG_ENC_UTF16)) out = utf16;
       // UTF-16 (little-endian)
-      elif (istr_iequal (*argv + cstrlen (ARG_OUT), ARG_ENC_UTF16LE))
+      elif (istr_iequal (*argv, ARG_ENC_UTF16LE))
       {
         out = utf16;
 
@@ -476,7 +491,7 @@ error_help:
 #endif
       }
       // UTF-16 (big-endian)
-      elif (istr_iequal (*argv + cstrlen (ARG_OUT), ARG_ENC_UTF16BE))
+      elif (istr_iequal (*argv, ARG_ENC_UTF16BE))
       {
         out = utf16;
 
@@ -484,10 +499,10 @@ error_help:
         bswp_out = true;
 #endif
       }
-      // UTF-32 (system endianness)
-      elif (istr_iequal (*argv + cstrlen (ARG_OUT), ARG_ENC_UTF32)) out = utf32;
+      // UTF-32 (host endianness)
+      elif (istr_iequal (*argv, ARG_ENC_UTF32)) out = utf32;
       // UTF-32 (little-endian)
-      elif (istr_iequal (*argv + cstrlen (ARG_OUT), ARG_ENC_UTF32LE))
+      elif (istr_iequal (*argv, ARG_ENC_UTF32LE))
       {
         out = utf32;
 
@@ -496,7 +511,7 @@ error_help:
 #endif
       }
       // UTF-32 (big-endian)
-      elif (istr_iequal (*argv + cstrlen (ARG_OUT), ARG_ENC_UTF32BE))
+      elif (istr_iequal (*argv, ARG_ENC_UTF32BE))
       {
         out = utf32;
 
@@ -507,18 +522,32 @@ error_help:
       else goto error_args;
     }
     // Byte order mark policy
-    elif (istr_niequal (*argv, ARG_BOM, cstrlen (ARG_BOM)))
+    elif (istr_iequal (*argv, ARG_BOM))
     {
-      // Auto: write for all encodings except UTF-8
-      if (istr_iequal (*argv + cstrlen (ARG_BOM), ARG_BOM_AUTO)) bom = bom_auto;
-      // Keep: write if was present in the input
-      elif (istr_iequal (*argv + cstrlen (ARG_BOM), ARG_BOM_KEEP)) bom = bom_keep;
-      // Do write
-      elif (istr_iequal (*argv + cstrlen (ARG_BOM), ARG_BOM_YES)) bom = bom_yes;
-      elif (istr_length (*argv) == cstrlen (ARG_BOM)) bom = bom_yes;
-      // Don't write
-      elif (istr_iequal (*argv + cstrlen (ARG_BOM), ARG_BOM_NO)) bom = bom_no;
-      else goto error_args;
+      argc--;
+      argv++;
+
+      if (argc != 0)
+      {
+        // Auto: write for all encodings except UTF-8
+        if (istr_iequal (*argv, ARG_BOM_AUTO)) bom = bom_auto;
+        // Keep: write if was present in the input UTF-8
+        elif (istr_iequal (*argv, ARG_BOM_KEEP)) bom = bom_keep;
+        // Do write
+        elif (istr_iequal (*argv, ARG_BOM_YES)) bom = bom_yes;
+        // Don't write
+        elif (istr_iequal (*argv, ARG_BOM_NO)) bom = bom_no;
+        else
+        {
+          bom = bom_yes;
+          continue;
+        }
+      }
+      else
+      {
+        bom = bom_yes;
+        break;
+      }
     }
     // Help
     elif (istr_iequal (*argv, ARG_HELP))
@@ -528,6 +557,7 @@ error_help:
     }
     else goto error_args;
 
+    argc--;
     argv++;
   }
 
