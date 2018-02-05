@@ -9,17 +9,17 @@
 // -----------------------------------------------------------------------------
 
 {
-  const u16* restrict i = in;
+  const u16* i = in;
 
 #if T(EXPLICIT)
-  const u16* restrict e = in + len;
+  const u16* e = in + len;
 #endif
 
 #if T(SIZE)
   T_size_t sz = 0;
 #else
-  u8* restrict o = out;
-  u8* restrict m = out + size;
+  u8* o = out;
+  const u8* m = out + size;
   int n;
 #endif
 

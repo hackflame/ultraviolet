@@ -9,18 +9,18 @@
 // -----------------------------------------------------------------------------
 
 {
-  const u8* restrict i = in;
+  const u8* i = in;
 
 #if T(EXPLICIT)
-  const u8* restrict e = in + len;
+  const u8* e = in + len;
   int t;
 #endif
 
 #if T(SIZE)
   T_size_t sz = 0;
 #else
-  u32* restrict o = out;
-  u32* restrict m = out + size;
+  u32* o = out;
+  const u32* m = out + size;
 #endif
 
 #if T(UTF8_TO32_SIMD)
