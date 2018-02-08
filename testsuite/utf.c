@@ -137,6 +137,7 @@ static void validate (const utf_enc_t enc, bool bswp_in, bool bswp_out
     {
       if (!io_file_eof (stdin)) error_io();
       if ((insz == 0) && !bom_eof) goto done;
+
       eof = true;
     }
 
@@ -208,6 +209,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
     {
       if (!io_file_eof (stdin)) error_io();
       if ((insz == 0) && !bom_eof) goto done;
+
       eof = true;
     }
 
@@ -567,10 +569,10 @@ error_help:
 #if OS(WIN32)
   // Put both streams into binary mode
   if (!io_file_flush (io_file_stdin)) error_io();
-  if (setmode (io_fd_stdin, O_BINARY) == -1) error_io();
+  if (!io_fd_binary (io_fd_stdin)) error_io();
 
   if (!io_file_flush (io_file_stdout)) error_io();
-  if (setmode (io_fd_stdout, O_BINARY) == -1) error_io();
+  if (!io_fd_binary (io_fd_stdout)) error_io();
 #endif
 
   // Detect the input encoding
