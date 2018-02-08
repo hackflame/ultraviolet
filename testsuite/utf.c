@@ -148,7 +148,7 @@ static void validate (const utf_enc_t enc, bool bswp_in, bool bswp_out
     {
       #define T_utf_in_t u8
       #define T_utf_in_sz 1u
-      #define T_utf_in_bswap_fun fun_nop_va
+      #define T_utf_in_bswap_fun zap
 
       #define T_utf_valid_fun utf8_str_valid
 
@@ -220,7 +220,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
     {
       #define T_utf_in_t u8
       #define T_utf_in_sz 1u
-      #define T_utf_in_bswap_fun fun_nop_va
+      #define T_utf_in_bswap_fun zap
 
       #define T_utf_out_t u16
       #define T_utf_out_sz 2u
@@ -234,7 +234,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
     {
       #define T_utf_in_t u8
       #define T_utf_in_sz 1u
-      #define T_utf_in_bswap_fun fun_nop_va
+      #define T_utf_in_bswap_fun zap
 
       #define T_utf_out_t u32
       #define T_utf_out_sz 4u
@@ -252,7 +252,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
 
       #define T_utf_out_t u8
       #define T_utf_out_sz 1u
-      #define T_utf_out_bswap_fun fun_nop_va
+      #define T_utf_out_bswap_fun zap
 
       #define T_utf_conv_fun utf16_str_to8
 
@@ -280,7 +280,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
 
       #define T_utf_out_t u8
       #define T_utf_out_sz 1u
-      #define T_utf_out_bswap_fun fun_nop_va
+      #define T_utf_out_bswap_fun zap
 
       #define T_utf_conv_fun utf32_str_to8
 
