@@ -520,14 +520,14 @@ static inline u16* utf16_str_seek (const u16* buf, const u16* end)
 
 static inline u16* utf16_str_rseek (const u16* buf, const u16* beg)
 {
-  utf16_str_rsync (buf - 1u, beg);
+  return utf16_str_rsync (buf - 1u, beg);
 }
 
 // -----------------------------------------------------------------------------
 
 static inline u16* utf16_istr_seek (const u16* str)
 {
-  utf16_istr_sync (str + 1u);
+  return utf16_istr_sync (str + 1u);
 }
 
 #define utf16_istr_rseek(str) utf16_str_rseek (str)
