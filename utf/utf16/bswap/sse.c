@@ -4,7 +4,7 @@
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
 
-sse:;
+;
   // Align to 16-byte boundaries
   const u16* b = ptr_align_ceil (16u, s);
 
