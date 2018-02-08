@@ -27,8 +27,8 @@ endif()
 if (CMAKE_COMPILER_IS_GCC_OR_CLANG)
   set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=native -O3")
 
-  set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -funsigned-char -Wno-pointer-sign")
-  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -funsigned-char -Wno-pointer-sign")
+  set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wno-pointer-sign")
+  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-pointer-sign")
 
   set (LINK_FLAGS_RELEASE "-s")
 
