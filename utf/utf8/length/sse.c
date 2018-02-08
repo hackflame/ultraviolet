@@ -4,7 +4,7 @@
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
 
-sse:
+;
   utf_align (u8, T_size_t, s, str, 16u);
 
   while (true)

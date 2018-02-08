@@ -4,7 +4,7 @@
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
 
-sse:;
+;
   const u32* restrict p;
   const u32* restrict r;
   uint a = 0;

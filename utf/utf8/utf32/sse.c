@@ -4,7 +4,7 @@
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
 
-sse:;
+;
   const u8* restrict p;
   const u8* restrict r;
   uint a = 0;
@@ -299,8 +299,6 @@ simd:
         | _mm_cmpestrc (xur, 4, xul, 8, _SIDD_UWORD_OPS | _SIDD_CMP_EQUAL_ANY
           | _SIDD_CMP_RANGES | _SIDD_POSITIVE_POLARITY))) goto scalar;
       #else
-        // `pcmpestri` is slow. When parsing from null-terminated strings
-        // it is possible to use `pcmpistri`, which is much faster.
         if (unlikely (_mm_cmpistrc (xur, xuh, _SIDD_UWORD_OPS | _SIDD_CMP_EQUAL_ANY
           | _SIDD_CMP_RANGES | _SIDD_POSITIVE_POLARITY)
         | _mm_cmpistrc (xur, xul, _SIDD_UWORD_OPS | _SIDD_CMP_EQUAL_ANY
