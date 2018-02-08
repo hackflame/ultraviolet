@@ -4,7 +4,7 @@
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
 
-#include <quantum/structures/string/intro.h>
+#include <quantum/structures/string/define.h>
 
 // -----------------------------------------------------------------------------
 
@@ -33,4 +33,4 @@
 
 // -----------------------------------------------------------------------------
 
-#include <quantum/structures/string/outro.h>
+#include <quantum/structures/string/undef.h>

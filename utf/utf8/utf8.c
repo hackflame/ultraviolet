@@ -4,7 +4,7 @@
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
 
-#include <quantum/structures/string/intro.h>
+#include <quantum/structures/string/define.h>
 
 // -----------------------------------------------------------------------------
 
@@ -23,8 +23,7 @@
 #endif
 
 #if CPU(X86) && T(EXPLICIT) && !T(VALID)
-  // It is possible to use the `bsr` instruction
-  // to count UTF-8 characters if validation is not requested
+  // Use the `bsr` instruction to count UTF-8 characters
   while (i < e)
   {
     register uint c = *i;
@@ -291,4 +290,4 @@ too_short:
 
 // -----------------------------------------------------------------------------
 
-#include <quantum/structures/string/outro.h>
+#include <quantum/structures/string/undef.h>
