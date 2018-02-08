@@ -70,7 +70,7 @@ typedef utf32_char_t utf32_chr_t;
 typedef struct utf8_str_s
 {
   size_t len;
-  utf8_chr_t* buf;
+  utf8_char_t* buf;
 } utf8_str_t;
 
 static const utf8_str_t utf8_str_null = (utf8_str_t){0};
@@ -83,7 +83,7 @@ static const utf8_str_t utf8_str_null = (utf8_str_t){0};
 typedef struct utf8_str_const_s
 {
   size_t len;
-  const utf8_chr_t* buf;
+  const utf8_char_t* buf;
 } utf8_str_const_t;
 
 static const utf8_str_const_t utf8_str_const_null = (utf8_str_const_t){0};
@@ -94,13 +94,26 @@ static const utf8_str_const_t utf8_str_const_null = (utf8_str_const_t){0};
 #define utf8_str_const_from_cstr(str) utf8_str_const_make ((str), cstrlen (str))
 
 // -----------------------------------------------------------------------------
+
+typedef struct utf8_estr_s
+{
+  size_t len;
+  utf8_char_t buf[];
+} utf8_estr_t;
+
+typedef struct utf8_estr_const_s
+{
+  size_t len;
+  const utf8_char_t buf[];
+} utf8_estr_const_t;
+
+// -----------------------------------------------------------------------------
 // These typedefs (`utfn_istr_t` and `utfn_istr_const_t`) should not be used.
-//
 // They are provided only for self-documentation purposes and completeness sake.
 // -----------------------------------------------------------------------------
 
-typedef utf8_chr_t* utf8_istr_t;
-typedef const utf8_chr_t* utf8_istr_const_t;
+typedef utf8_char_t* utf8_istr_t;
+typedef const utf8_char_t* utf8_istr_const_t;
 
 // -----------------------------------------------------------------------------
 // UTF-16
@@ -109,7 +122,7 @@ typedef const utf8_chr_t* utf8_istr_const_t;
 typedef struct utf16_str_s
 {
   size_t len;
-  utf16_chr_t* buf;
+  utf16_char_t* buf;
 } utf16_str_t;
 
 static const utf16_str_t utf16_str_null = (utf16_str_t){0};
@@ -122,7 +135,7 @@ static const utf16_str_t utf16_str_null = (utf16_str_t){0};
 typedef struct utf16_str_const_s
 {
   size_t len;
-  const utf16_chr_t* buf;
+  const utf16_char_t* buf;
 } utf16_str_const_t;
 
 static const utf16_str_const_t utf16_str_const_null = (utf16_str_const_t){0};
@@ -134,8 +147,22 @@ static const utf16_str_const_t utf16_str_const_null = (utf16_str_const_t){0};
 
 // -----------------------------------------------------------------------------
 
-typedef utf16_chr_t* utf16_istr_t;
-typedef const utf16_chr_t* utf16_istr_const_t;
+typedef struct utf16_estr_s
+{
+  size_t len;
+  utf16_char_t buf[];
+} utf16_estr_t;
+
+typedef struct utf16_estr_const_s
+{
+  size_t len;
+  const utf16_char_t buf[];
+} utf16_estr_const_t;
+
+// -----------------------------------------------------------------------------
+
+typedef utf16_char_t* utf16_istr_t;
+typedef const utf16_char_t* utf16_istr_const_t;
 
 // -----------------------------------------------------------------------------
 // UTF-32
@@ -144,7 +171,7 @@ typedef const utf16_chr_t* utf16_istr_const_t;
 typedef struct utf32_str_s
 {
   size_t len;
-  utf32_chr_t* buf;
+  utf32_char_t* buf;
 } utf32_str_t;
 
 static const utf32_str_t utf32_str_null = (utf32_str_t){0};
@@ -157,7 +184,7 @@ static const utf32_str_t utf32_str_null = (utf32_str_t){0};
 typedef struct utf32_str_const_s
 {
   size_t len;
-  const utf32_chr_t* buf;
+  const utf32_char_t* buf;
 } utf32_str_const_t;
 
 static const utf32_str_const_t utf32_str_const_null = (utf32_str_const_t){0};
@@ -169,8 +196,22 @@ static const utf32_str_const_t utf32_str_const_null = (utf32_str_const_t){0};
 
 // -----------------------------------------------------------------------------
 
-typedef utf32_chr_t* utf32_istr_t;
-typedef const utf32_chr_t* utf32_istr_const_t;
+typedef struct utf32_estr_s
+{
+  size_t len;
+  utf32_char_t buf[];
+} utf32_estr_t;
+
+typedef struct utf32_estr_const_s
+{
+  size_t len;
+  const utf32_char_t buf[];
+} utf32_estr_const_t;
+
+// -----------------------------------------------------------------------------
+
+typedef utf32_char_t* utf32_istr_t;
+typedef const utf32_char_t* utf32_istr_const_t;
 
 // =============================================================================
 // Macros
@@ -370,8 +411,6 @@ static inline u8* utf8_istr_sync (const u8* str)
 
 // -----------------------------------------------------------------------------
 // `ptr` must be synchronized
-// -----------------------------------------------------------------------------
-
 static inline u8* utf8_chr_next (const u8* ptr)
 {
   register uint b = *ptr;
