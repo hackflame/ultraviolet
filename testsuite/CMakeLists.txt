@@ -6,9 +6,8 @@
 
 cmake_minimum_required (VERSION 3.0.2)
 
-project (ultraviolet)
+project (utf)
 
-# Directories
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 
 set (QUANTUM_DIR ${QUANTUM})
@@ -19,42 +18,42 @@ set (ULTRAVIOLET_DIR ${ULTRAVIOLET})
 string (REPLACE "\\" "/" ULTRAVIOLET_DIR ${ULTRAVIOLET_DIR})
 include_directories ("${ULTRAVIOLET_DIR}")
 
-# Flags
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-  set (CMAKE_COMPILER_IS_GCC_OR_CLANG 1)
-endif()
+include ("${QUANTUM_DIR}/testsuite/quantum.cmake")
 
-if (CMAKE_COMPILER_IS_GCC_OR_CLANG)
-  set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=native -O3")
+quantum_configure_compiler_flags()
 
-  set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wno-pointer-sign")
-  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-pointer-sign")
-
-  set (LINK_FLAGS_RELEASE "-s")
-
-  if (WIN32)
-    set (LINK_FLAGS_RELEASE "-mconsole -municode ${LINK_FLAGS_RELEASE}")
-    set (LINK_FLAGS_DEBUG "-mconsole -municode ${LINK_FLAGS_DEBUG}")
-  endif()
-endif()
-
-# Units
 set (UTF_C "${CMAKE_SOURCE_DIR}/utf.c")
+list (APPEND SOURCES ${UTF_C})
 
-set (UTF8_C "${ULTRAVIOLET_DIR}/utf/utf8.c")
-set (UTF16_C "${ULTRAVIOLET_DIR}/utf/utf16.c")
-set (UTF32_C "${ULTRAVIOLET_DIR}/utf/utf32.c")
+set (UTF8_C "${ULTRAVIOLET_DIR}/ultraviolet/utf/utf8.c")
+list (APPEND SOURCES ${UTF8_C})
 
-if (WIN32)
-  set_source_files_properties (${UTF_C} PROPERTIES COMPILE_DEFINITIONS "CONSOLE")
-endif()
+set (UTF16_C "${ULTRAVIOLET_DIR}/ultraviolet/utf/utf16.c")
+list (APPEND SOURCES ${UTF16_C})
 
-# Executable
-add_executable (utf ${UTF_C} ${UTF8_C} ${UTF16_C} ${UTF32_C})
+set (UTF32_C "${ULTRAVIOLET_DIR}/ultraviolet/utf/utf32.c")
+list (APPEND SOURCES ${UTF32_C})
 
-set_target_properties (utf PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS_RELEASE}")
-set_target_properties (utf PROPERTIES LINK_FLAGS_DEBUG "${LINK_FLAGS_DEBUG}")
+set (STRING_BUFFER_C "${QUANTUM_DIR}/quantum/string/buffer.c")
+list (APPEND SOURCES ${STRING_BUFFER_C})
 
-if (WIN32)
-  target_link_libraries (utf mingw32 msvcr120)
-endif()
+set (ISTRING_BUFFER_C "${QUANTUM_DIR}/quantum/string/implicit/buffer.c")
+list (APPEND SOURCES ${ISTRING_BUFFER_C})
+
+set (STRING16_BUFFER_C "${QUANTUM_DIR}/quantum/unicode/string16/buffer.c")
+list (APPEND SOURCES ${STRING16_BUFFER_C})
+
+set (ISTRING16_BUFFER_C "${QUANTUM_DIR}/quantum/unicode/string16/implicit/buffer.c")
+list (APPEND SOURCES ${ISTRING16_BUFFER_C})
+
+set (STRING32_BUFFER_C "${QUANTUM_DIR}/quantum/unicode/string32/buffer.c")
+list (APPEND SOURCES ${STRING32_BUFFER_C})
+
+set (ISTRING32_BUFFER_C "${QUANTUM_DIR}/quantum/unicode/string32/implicit/buffer.c")
+list (APPEND SOURCES ${ISTRING32_BUFFER_C})
+
+quantum_windows_program (${SOURCES})
+
+add_executable (${PROJECT_NAME} ${SOURCES})
+
+quantum_configure_linker_flags()

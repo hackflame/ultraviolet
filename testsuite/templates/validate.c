@@ -15,12 +15,18 @@
 
   insz /= T_utf_in_sz;
 
-  if (bswp_in) T_utf_in_bswap_fun ((T_utf_in_t*)in, insz);
+  if (bswp_in)
+  {
+    T_utf_in_bswap_fn ((T_utf_in_t*)in, insz);
+  }
 
   T_utf_in_t* pos;
-  size_t runes;
 
-  int ret = T_utf_valid_fun ((T_utf_in_t*)in, insz, &pos, &runes);
+#if (T_utf_in_sz != 4u)
+  size_t runes;
+#endif
+
+  int ret = T_utf_valid_fn ((T_utf_in_t*)in, insz, &pos, &runes);
 
   size_t n = (size_t)(pos - (T_utf_in_t*)in);
   num += n;
@@ -37,7 +43,10 @@
 
   if (copy)
   {
-    if (bswp_out) T_utf_in_bswap_fun ((T_utf_in_t*)in, insz);
+    if (bswp_out)
+    {
+      T_utf_in_bswap_fn ((T_utf_in_t*)in, insz);
+    }
 
     insz *= T_utf_in_sz;
 
@@ -50,6 +59,6 @@
 
 #undef T_utf_in_t
 #undef T_utf_in_sz
-#undef T_utf_in_bswap_fun
+#undef T_utf_in_bswap_fn
 
-#undef T_utf_valid_fun
+#undef T_utf_valid_fn
