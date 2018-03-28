@@ -17,10 +17,10 @@
 
 // -----------------------------------------------------------------------------
 
-#include <quantum/string.h>
-#include <quantum/unicode/string16.h>
-#include <quantum/unicode/string32.h>
-#include <quantum/bitops.h>
+#include <cwift/string.h>
+#include <cwift/unicode/string16.h>
+#include <cwift/unicode/string32.h>
+#include <cwift/bitops.h>
 
 // =============================================================================
 // Constants

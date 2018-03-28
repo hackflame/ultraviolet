@@ -106,7 +106,7 @@ Run it with `-help` argument for detailed usage instructions.
 
 ## Building
 
-You will need [QUANTUM](https://github.com/garnetius/quantum) headers
+You will need [Cwift](https://github.com/garnetius/cwift) headers
 to build **Ultraviolet**.
 
 Otherwise, the process is straightforward.

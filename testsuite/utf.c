@@ -4,20 +4,20 @@
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
 
-#include <quantum/platform.h>
+#include <cwift/platform.h>
 
 #if OS_WIN32
   #include <Windows.h>
 #endif
 
-#include <quantum/core.h>
-#include <quantum/main.h>
-#include <quantum/integer.h>
-#include <quantum/string.h>
-#include <quantum/unicode/string16.h>
-#include <quantum/unicode/string32.h>
-#include <quantum/io.h>
-#include <quantum/keywords.h>
+#include <cwift/core.h>
+#include <cwift/main.h>
+#include <cwift/integer.h>
+#include <cwift/string.h>
+#include <cwift/unicode/string16.h>
+#include <cwift/unicode/string32.h>
+#include <cwift/io.h>
+#include <cwift/keywords.h>
 
 #include <ultraviolet/utf.h>
 
@@ -160,7 +160,7 @@ static void validate (const utf_enc_t enc, bool bswp_in, bool bswp_out
     {
       #define T_utf_in_t u8
       #define T_utf_in_sz 1u
-      #define T_utf_in_bswap_fn ZAP
+      #define T_utf_in_bswap_fn fn_nop2
 
       #define T_utf_valid_fn utf8_str_valid
 
@@ -232,7 +232,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
     {
       #define T_utf_in_t u8
       #define T_utf_in_sz 1u
-      #define T_utf_in_bswap_fn ZAP
+      #define T_utf_in_bswap_fn fn_nop2
 
       #define T_utf_out_t u16
       #define T_utf_out_sz 2u
@@ -246,7 +246,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
     {
       #define T_utf_in_t u8
       #define T_utf_in_sz 1u
-      #define T_utf_in_bswap_fn ZAP
+      #define T_utf_in_bswap_fn fn_nop2
 
       #define T_utf_out_t u32
       #define T_utf_out_sz 4u
@@ -264,7 +264,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
 
       #define T_utf_out_t u8
       #define T_utf_out_sz 1u
-      #define T_utf_out_bswap_fn ZAP
+      #define T_utf_out_bswap_fn fn_nop2
 
       #define T_utf_conv_fn utf16_str_to8
 
@@ -292,7 +292,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
 
       #define T_utf_out_t u8
       #define T_utf_out_sz 1u
-      #define T_utf_out_bswap_fn ZAP
+      #define T_utf_out_bswap_fn fn_nop2
 
       #define T_utf_conv_fn utf32_str_to8
 
@@ -354,7 +354,7 @@ static void mark (utf_enc_t enc, bool bswp_out)
 
 // =============================================================================
 
-static err_t quantum (u8** argv, size_t argc)
+static err_t cwift (u8** argv, size_t argc)
 {
   // Parse command line arguments
   u8* prog = *argv;
@@ -700,7 +700,7 @@ assume_utf8:
 
   if (out == 0)
   {
-    if (in == utf8) validate (utf8, false, false, copy);
+      if (in == utf8) validate (utf8, false, false, copy);
     elif (in == utf16) validate (utf16, bswp_in, bswp_out, copy);
     elif (in == utf32) validate (utf32, bswp_in, bswp_out, copy);
   }
@@ -708,7 +708,7 @@ assume_utf8:
   // Validate and convert
   else
   {
-    if ((in == utf8) && (out == utf16)) convert (utf8_to16, false, bswp_out);
+      if ((in == utf8) && (out == utf16)) convert (utf8_to16, false, bswp_out);
     elif ((in == utf8) && (out == utf32)) convert (utf8_to32, false, bswp_out);
     elif ((in == utf16) && (out == utf8)) convert (utf16_to8, bswp_in, false);
     elif ((in == utf16) && (out == utf32)) convert (utf16_to32, bswp_in, bswp_out);
@@ -721,4 +721,4 @@ assume_utf8:
 
 // -----------------------------------------------------------------------------
 
-#include <quantum/main.c>
+#include <cwift/main.c>

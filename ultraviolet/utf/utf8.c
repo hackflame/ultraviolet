@@ -4,12 +4,12 @@
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
 
-#include <quantum/platform.h>
-#include <quantum/core.h>
+#include <cwift/platform.h>
+#include <cwift/core.h>
 
-#include <quantum/bswap.h>
-#include <quantum/swar.h>
-#include <quantum/simd.h>
+#include <cwift/bswap.h>
+#include <cwift/swar.h>
+#include <cwift/simd.h>
 
 #include "simd.h"
 
