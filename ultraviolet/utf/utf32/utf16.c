@@ -33,17 +33,17 @@
     register u32f c = *i;
 
     // Single BMP character
-    if (likely (!utf32_char_is_surr (c)))
+    if (likely (!utf32_codep_is_surr (c)))
     {
 #if T_VALID
       // Check for UTF-16 surrogate character
-      if (unlikely (utf16_byte_is_surr (c))) goto invalid;
+      if (unlikely (utf16_cunit_is_surr (c))) goto invalid;
 
       // Check for Unicode non-character
-      if (unlikely (utf16_char_is_non (c))) goto invalid;
+      if (unlikely (utf16_codep_is_non (c))) goto invalid;
 
       // Check for reserved Unicode character
-      if (unlikely (utf16_char_is_rsrv (c))) goto invalid;
+      if (unlikely (utf16_codep_is_rsrv (c))) goto invalid;
 #endif
 
 #if T_SIZE
@@ -67,14 +67,14 @@
 
     // Surrogate pair
 #if T_VALID
-    else if (likely (utf32_char_is_surr (c)))
+    else if (likely (utf32_codep_is_surr (c)))
 #else
     else
 #endif
     {
 #if T_VALID
       // Check for reserved Unicode character
-      if (unlikely (utf16_char_is_rsrv (c))) goto invalid;
+      if (unlikely (utf16_codep_is_rsrv (c))) goto invalid;
 #endif
 
 #if T_SIZE

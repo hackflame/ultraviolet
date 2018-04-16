@@ -143,11 +143,11 @@ static void validate (const utf_enc_t enc, bool bswp_in, bool bswp_out
   while (true)
   {
     size_t size = BUF_SIZE - off;
-    size_t insz = io_file_read (stdin, in + off, size);
+    size_t insz = io_stream_read (stdin, in + off, size);
 
     if (insz != size)
     {
-      if (!io_file_end (stdin)) error_io();
+      if (!io_stream_end (stdin)) error_io();
       if ((insz == 0) && !bom_eof) goto done;
 
       eof = true;
@@ -164,7 +164,7 @@ static void validate (const utf_enc_t enc, bool bswp_in, bool bswp_out
 
       #define T_utf_valid_fn utf8_str_valid
 
-      #include "templates/validate.c"
+      #include "utf/validate.c"
     }
     elif (enc == utf16)
     {
@@ -174,7 +174,7 @@ static void validate (const utf_enc_t enc, bool bswp_in, bool bswp_out
 
       #define T_utf_valid_fn utf16_str_valid
 
-      #include "templates/validate.c"
+      #include "utf/validate.c"
     }
     elif (enc == utf32)
     {
@@ -184,7 +184,7 @@ static void validate (const utf_enc_t enc, bool bswp_in, bool bswp_out
 
       #define T_utf_valid_fn(in, len, end, runes) utf32_str_valid (in, len, end)
 
-      #include "templates/validate.c"
+      #include "utf/validate.c"
     }
 
     if (eof)
@@ -215,11 +215,11 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
   while (true)
   {
     size_t size = BUF_SIZE - off;
-    size_t insz = io_file_read (stdin, in + off, size);
+    size_t insz = io_stream_read (stdin, in + off, size);
 
     if (insz != size)
     {
-      if (!io_file_end (stdin)) error_io();
+      if (!io_stream_end (stdin)) error_io();
       if ((insz == 0) && !bom_eof) goto done;
 
       eof = true;
@@ -240,7 +240,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
 
       #define T_utf_conv_fn utf8_str_to16
 
-      #include "templates/convert.c"
+      #include "utf/convert.c"
     }
     elif (conv == utf8_to32)
     {
@@ -254,7 +254,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
 
       #define T_utf_conv_fn utf8_str_to32
 
-      #include "templates/convert.c"
+      #include "utf/convert.c"
     }
     elif (conv == utf16_to8)
     {
@@ -268,7 +268,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
 
       #define T_utf_conv_fn utf16_str_to8
 
-      #include "templates/convert.c"
+      #include "utf/convert.c"
     }
     elif (conv == utf16_to32)
     {
@@ -282,7 +282,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
 
       #define T_utf_conv_fn utf16_str_to32
 
-      #include "templates/convert.c"
+      #include "utf/convert.c"
     }
     elif (conv == utf32_to8)
     {
@@ -296,7 +296,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
 
       #define T_utf_conv_fn utf32_str_to8
 
-      #include "templates/convert.c"
+      #include "utf/convert.c"
     }
     elif (conv == utf32_to16)
     {
@@ -310,7 +310,7 @@ static void convert (const utf_conv_t conv, bool bswp_in, bool bswp_out)
 
       #define T_utf_conv_fn utf32_str_to16
 
-      #include "templates/convert.c"
+      #include "utf/convert.c"
     }
 
     if (eof)
@@ -332,7 +332,7 @@ static void mark (utf_enc_t enc, bool bswp_out)
 {
   if (enc == utf8)
   {
-    if (io_file_write (stdout, utf8_bom, 3u) != 3u) error_io();
+    if (io_stream_write (stdout, utf8_bom, 3u) != 3u) error_io();
   }
   elif (enc == utf16)
   {
@@ -340,7 +340,7 @@ static void mark (utf_enc_t enc, bool bswp_out)
 
     if (bswp_out) bom = bswap16 (bom);
 
-    if (io_file_write (stdout, (u8*)&bom, 2u) != 2u) error_io();
+    if (io_stream_write (stdout, (u8*)&bom, 2u) != 2u) error_io();
   }
   elif (enc == utf32)
   {
@@ -348,7 +348,7 @@ static void mark (utf_enc_t enc, bool bswp_out)
 
     if (bswp_out) bom = bswap32 (bom);
 
-    if (io_file_write (stdout, (u8*)&bom, 4u) != 4u) error_io();
+    if (io_stream_write (stdout, (u8*)&bom, 4u) != 4u) error_io();
   }
 }
 
@@ -430,7 +430,7 @@ error_help:
   while (argc)
   {
     // Input encoding
-    if (istr_iequal (*argv, S(ARG_IN)))
+    if (zstr_iequal (*argv, S(ARG_IN)))
     {
       argc--;
       argv++;
@@ -438,11 +438,11 @@ error_help:
       if (argc == 0) goto error_args;
 
       // UTF-8
-      if (istr_iequal (*argv, S(ARG_ENC_UTF8))) in = utf8;
+      if (zstr_iequal (*argv, S(ARG_ENC_UTF8))) in = utf8;
       // UTF-16 (host endianness)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF16))) in = utf16;
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF16))) in = utf16;
       // UTF-16 (little-endian)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF16LE)))
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF16LE)))
       {
         in = utf16;
 
@@ -451,7 +451,7 @@ error_help:
 #endif
       }
       // UTF-16 (big-endian)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF16BE)))
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF16BE)))
       {
         in = utf16;
 
@@ -460,9 +460,9 @@ error_help:
 #endif
       }
       // UTF-32 (host endianness)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF32))) in = utf32;
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF32))) in = utf32;
       // UTF-32 (little-endian)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF32LE)))
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF32LE)))
       {
         in = utf32;
 
@@ -471,7 +471,7 @@ error_help:
 #endif
       }
       // UTF-32 (big-endian)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF32BE)))
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF32BE)))
       {
         in = utf32;
 
@@ -480,11 +480,11 @@ error_help:
 #endif
       }
       // Autodetect
-      elif (istr_iequal (*argv, S(ARG_BOM_AUTO))) in = utf_auto;
+      elif (zstr_iequal (*argv, S(ARG_BOM_AUTO))) in = utf_auto;
       else goto error_args;
     }
     // Output encoding
-    elif (istr_iequal (*argv, S(ARG_OUT)))
+    elif (zstr_iequal (*argv, S(ARG_OUT)))
     {
       argc--;
       argv++;
@@ -492,11 +492,11 @@ error_help:
       if (argc == 0) goto error_args;
 
       // UTF-8
-      if (istr_iequal (*argv, S(ARG_ENC_UTF8))) out = utf8;
+      if (zstr_iequal (*argv, S(ARG_ENC_UTF8))) out = utf8;
       // UTF-16 (host endianness)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF16))) out = utf16;
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF16))) out = utf16;
       // UTF-16 (little-endian)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF16LE)))
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF16LE)))
       {
         out = utf16;
 
@@ -505,7 +505,7 @@ error_help:
 #endif
       }
       // UTF-16 (big-endian)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF16BE)))
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF16BE)))
       {
         out = utf16;
 
@@ -514,9 +514,9 @@ error_help:
 #endif
       }
       // UTF-32 (host endianness)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF32))) out = utf32;
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF32))) out = utf32;
       // UTF-32 (little-endian)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF32LE)))
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF32LE)))
       {
         out = utf32;
 
@@ -525,7 +525,7 @@ error_help:
 #endif
       }
       // UTF-32 (big-endian)
-      elif (istr_iequal (*argv, S(ARG_ENC_UTF32BE)))
+      elif (zstr_iequal (*argv, S(ARG_ENC_UTF32BE)))
       {
         out = utf32;
 
@@ -536,7 +536,7 @@ error_help:
       else goto error_args;
     }
     // Byte order mark policy
-    elif (istr_iequal (*argv, S(ARG_BOM)))
+    elif (zstr_iequal (*argv, S(ARG_BOM)))
     {
       argc--;
       argv++;
@@ -544,13 +544,13 @@ error_help:
       if (argc != 0)
       {
         // Auto: write for all encodings except UTF-8
-        if (istr_iequal (*argv, S(ARG_BOM_AUTO))) bom = bom_auto;
+        if (zstr_iequal (*argv, S(ARG_BOM_AUTO))) bom = bom_auto;
         // Keep: write if was present in the input UTF-8
-        elif (istr_iequal (*argv, S(ARG_BOM_KEEP))) bom = bom_keep;
+        elif (zstr_iequal (*argv, S(ARG_BOM_KEEP))) bom = bom_keep;
         // Do write
-        elif (istr_iequal (*argv, S(ARG_BOM_YES))) bom = bom_yes;
+        elif (zstr_iequal (*argv, S(ARG_BOM_YES))) bom = bom_yes;
         // Don't write
-        elif (istr_iequal (*argv, S(ARG_BOM_NO))) bom = bom_no;
+        elif (zstr_iequal (*argv, S(ARG_BOM_NO))) bom = bom_no;
         else
         {
           bom = bom_yes;
@@ -564,7 +564,7 @@ error_help:
       }
     }
     // Help
-    elif (istr_iequal (*argv, S(ARG_HELP)))
+    elif (zstr_iequal (*argv, S(ARG_HELP)))
     {
       help = true;
       goto error_help;
@@ -580,21 +580,21 @@ error_help:
 
 #if OS_WIN32
   // Put both streams into binary mode
-  if (!io_file_flush (io_file_stdin)) error_io();
-  if (!io_fd_set_binary (io_fd_stdin)) error_io();
+  if (!io_stream_flush (stdin)) error_io();
+  if (!io_fd_set_binary (fdin)) error_io();
 
-  if (!io_file_flush (io_file_stdout)) error_io();
-  if (!io_fd_set_binary (io_fd_stdout)) error_io();
+  if (!io_stream_flush (stdout)) error_io();
+  if (!io_fd_set_binary (fdout)) error_io();
 #endif
 
   // Detect the input encoding
   if (in == 0)
   {
-    size_t num = io_file_read (stdin, bom_buf, 4u);
+    size_t num = io_stream_read (stdin, bom_buf, 4u);
 
     if (num != 4u)
     {
-      if (!io_file_end (stdin)) error_io();
+      if (!io_stream_end (stdin)) error_io();
       bom_eof = true;
     }
 

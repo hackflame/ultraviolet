@@ -1,5 +1,5 @@
 // =============================================================================
-// <testsuite/templates/convert.c>
+// <testsuite/utf/convert.c>
 //
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
@@ -41,7 +41,7 @@
 
     outsz *= T_utf_out_sz;
 
-    if (io_file_write (stdout, (T_utf_out_t*)out, outsz) != outsz) error_io();
+    if (io_stream_write (stdout, (T_utf_out_t*)out, outsz) != outsz) error_io();
 
     if (ret < 0)
     {

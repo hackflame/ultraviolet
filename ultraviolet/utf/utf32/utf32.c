@@ -27,13 +27,13 @@
 
 #if T_VALID
     // Check for UTF-16 surrogate character
-    if (unlikely (utf16_byte_is_surr (c))) goto invalid;
+    if (unlikely (utf16_cunit_is_surr (c))) goto invalid;
 
     // Check for Unicode non-character
-    if (unlikely (utf16_char_is_non (c))) goto invalid;
+    if (unlikely (utf16_codep_is_non (c))) goto invalid;
 
     // Check for reserved Unicode character
-    if (unlikely (utf16_char_is_rsrv (c))) goto invalid;
+    if (unlikely (utf16_codep_is_rsrv (c))) goto invalid;
 #endif
 
 #if !T_EXPLICIT

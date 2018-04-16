@@ -33,7 +33,7 @@
     register u16f c = *i;
 
     // One ASCII byte
-    if (likely (utf16_char_is_lead1 (c)))
+    if (likely (utf16_codep_is_lead1 (c)))
     {
 #if T_SIZE
       sz++;
@@ -57,7 +57,7 @@
     }
 
     // Two UTF-8 bytes
-    else if (likely (utf16_char_is_lead2 (c)))
+    else if (likely (utf16_codep_is_lead2 (c)))
     {
 #if T_SIZE
       sz += 2u;
@@ -69,8 +69,8 @@
       }
 
       // Compose the 2-byte UTF-8 codepoint
-      o[0] = (u8)utf8_char_get_lead2 (c);
-      o[1] = (u8)utf8_char_get_trail1 (c);
+      o[0] = (u8)utf8_codep_get_lead2 (c);
+      o[1] = (u8)utf8_codep_get_trail1 (c);
 
       o += 2u;
 #endif
@@ -79,14 +79,14 @@
     }
 
     // Three UTF-8 bytes
-    else if (likely (!utf16_byte_is_surr (c)))
+    else if (likely (!utf16_cunit_is_surr (c)))
     {
 #if T_VALID
       // Check for Unicode non-character
-      if (unlikely (utf16_char_is_non (c))) goto invalid;
+      if (unlikely (utf16_codep_is_non (c))) goto invalid;
 
       // Check for reserved Unicode character
-      if (unlikely (utf16_char_is_rsrv (c))) goto invalid;
+      if (unlikely (utf16_codep_is_rsrv (c))) goto invalid;
 #endif
 
 #if T_SIZE
@@ -99,9 +99,9 @@
       }
 
       // Compose the 3-byte UTF-8 codepoint
-      o[0] = (u8)utf8_char_get_lead3 (c);
-      o[1] = (u8)utf8_char_get_trail2 (c);
-      o[2] = (u8)utf8_char_get_trail1 (c);
+      o[0] = (u8)utf8_codep_get_lead3 (c);
+      o[1] = (u8)utf8_codep_get_trail2 (c);
+      o[2] = (u8)utf8_codep_get_trail1 (c);
 
       o += 3u;
 #endif
@@ -111,7 +111,7 @@
 
     // Four UTF-8 bytes
 #if T_VALID
-    else if (unlikely (utf16_byte_is_surr_high (c)))
+    else if (unlikely (utf16_cunit_is_surr_high (c)))
 #else
     else
 #endif
@@ -126,7 +126,7 @@
 
 #if T_VALID
       // Check if it's actually a low surrogate
-      if (unlikely (!utf16_byte_is_surr_low (cs))) goto invalid;
+      if (unlikely (!utf16_cunit_is_surr_low (cs))) goto invalid;
 #elif !T_EXPLICIT
       // Invalid sequence
       if (unlikely (cs == '\0')) goto invalid;
@@ -140,7 +140,7 @@
       if (unlikely ((w - 0x10000u) > 0xFFFFFu)) goto invalid;
 
       // Check for reserved Unicode character
-      if (unlikely (utf16_char_is_rsrv (w))) goto invalid;
+      if (unlikely (utf16_codep_is_rsrv (w))) goto invalid;
 #endif
 
 #if T_SIZE
@@ -154,10 +154,10 @@
       }
 
       // Compose the 4-byte UTF-8 codepoint
-      o[0] = (u8)utf8_char_get_lead4 (w);
-      o[1] = (u8)utf8_char_get_trail3 (w);
-      o[2] = (u8)utf8_char_get_trail2 (w);
-      o[3] = (u8)utf8_char_get_trail1 (w);
+      o[0] = (u8)utf8_codep_get_lead4 (w);
+      o[1] = (u8)utf8_codep_get_trail3 (w);
+      o[2] = (u8)utf8_codep_get_trail2 (w);
+      o[3] = (u8)utf8_codep_get_trail1 (w);
 
       o += 4u;
 #endif

@@ -23,11 +23,11 @@
   while (i != e)
   {
     register u32 c = *i;
-    register uint n = bsr32 (/*~c << 24*/bswap32 (c));
+    register ptr_diff_t n = (ptr_diff_t)bsr32 (~c << 24);
 
-    n = utf8_byte_is_lead1 (c) ? 1u : n;
+    n = utf8_cunit_is_lead1 (c) ? 1 : n;
 
-    if (unlikely ((i + n) > e))
+    if (unlikely ((e - i) < n))
     {
       t = e - (i + n);
       goto too_short;
@@ -52,7 +52,7 @@
     register u8f c = *i;
 
     // Single ASCII byte
-    if (likely (utf8_byte_is_lead1 (c)))
+    if (likely (utf8_cunit_is_lead1 (c)))
     {
 #if !T_EXPLICIT
       if (unlikely (c == '\0')) break;
@@ -66,7 +66,7 @@
     else
     {
       // Two UTF-8 bytes
-      if (likely (utf8_byte_is_lead2 (c)))
+      if (likely (utf8_cunit_is_lead2 (c)))
       {
 #if T_EXPLICIT
         // Check if the input ends abruptly
@@ -82,7 +82,7 @@
 
 #if T_VALID
         // Check if the input byte is a UTF-8 suffix byte
-        if (unlikely (!utf8_byte_is_trail (c1))) goto invalid;
+        if (unlikely (!utf8_cunit_is_trail (c1))) goto invalid;
 #elif !T_EXPLICIT
         // Invalid sequence
         if (unlikely (c1 == '\0')) goto invalid;
@@ -90,17 +90,17 @@
 
 #if T_VALID
         // Compose the UTF-32 codepoint from two UTF-8 bytes
-        u16f w = utf8_char_make2 (c, c1);
+        u16f w = utf8_codep_make2 (c, c1);
 
         // Check for overlong sequence
-        if (unlikely (utf32_char_is_lead1 (w))) goto invalid;
+        if (unlikely (utf32_codep_is_lead1 (w))) goto invalid;
 #endif
 
         i += 2u;
       }
 
       // Three UTF-8 bytes
-      else if (likely (utf8_byte_is_lead3 (c)))
+      else if (likely (utf8_cunit_is_lead3 (c)))
       {
 #if T_EXPLICIT
         if (unlikely ((i + 3u) > e))
@@ -116,13 +116,13 @@
 
         if (unlikely (((c1 | (c2 << 8)) & 0xC0C0u) != 0x8080u)) goto invalid;
 
-        u16f w = utf8_char_make3 (c, c1, c2);
+        u16f w = utf8_codep_make3 (c, c1, c2);
 #else
         u16f c1 = i[1];
         unused(c1);
 
   #if T_VALID
-        if (unlikely (!utf8_byte_is_trail (c1))) goto invalid;
+        if (unlikely (!utf8_cunit_is_trail (c1))) goto invalid;
   #elif !T_EXPLICIT
         if (unlikely (c1 == '\0')) goto invalid;
   #endif
@@ -131,10 +131,10 @@
         unused(c2);
 
   #if T_VALID
-        if (unlikely (!utf8_byte_is_trail (c2))) goto invalid;
+        if (unlikely (!utf8_cunit_is_trail (c2))) goto invalid;
 
         // Compose the UTF-32 codepoint from three UTF-8 bytes
-        u16f w = utf8_char_make3 (c, c1, c2);
+        u16f w = utf8_codep_make3 (c, c1, c2);
   #elif !T_EXPLICIT
         if (unlikely (c2 == '\0')) goto invalid;
   #endif
@@ -142,16 +142,16 @@
 
 #if T_VALID
         // Check for overlong sequence
-        if (unlikely (utf32_char_is_lead2 (w))) goto invalid;
+        if (unlikely (utf32_codep_is_lead2 (w))) goto invalid;
 
         // Check for UTF-16 surrogate character
-        if (unlikely (utf16_byte_is_surr (w))) goto invalid;
+        if (unlikely (utf16_cunit_is_surr (w))) goto invalid;
 
         // Check for Unicode non-character
-        if (unlikely (utf16_char_is_non (w))) goto invalid;
+        if (unlikely (utf16_codep_is_non (w))) goto invalid;
 
         // Check for reserved Unicode character
-        if (unlikely (utf16_char_is_rsrv (w))) goto invalid;
+        if (unlikely (utf16_codep_is_rsrv (w))) goto invalid;
 #endif
 
         i += 3u;
@@ -159,7 +159,7 @@
 
       // Four UTF-8 bytes
 #if T_VALID
-      else if (unlikely (utf8_byte_is_lead4 (c)))
+      else if (unlikely (utf8_cunit_is_lead4 (c)))
 #else
       else
 #endif
@@ -179,13 +179,13 @@
 
         if (unlikely (((c1 | (c2 << 8) | (c3 << 16)) & 0xC0C0C0u) != 0x808080u)) goto invalid;
 
-        u32f w = utf8_char_make4 (c, c1, c2, c3);
+        u32f w = utf8_codep_make4 (c, c1, c2, c3);
 #else
         u32f c1 = i[1];
         unused(c1);
 
   #if T_VALID
-        if (unlikely (!utf8_byte_is_trail (c1))) goto invalid;
+        if (unlikely (!utf8_cunit_is_trail (c1))) goto invalid;
   #elif !T_EXPLICIT
         if (unlikely (c1 == '\0')) goto invalid;
   #endif
@@ -194,7 +194,7 @@
         unused(c2);
 
   #if T_VALID
-        if (unlikely (!utf8_byte_is_trail (c2))) goto invalid;
+        if (unlikely (!utf8_cunit_is_trail (c2))) goto invalid;
   #elif !T_EXPLICIT
         if (unlikely (c2 == '\0')) goto invalid;
   #endif
@@ -203,10 +203,10 @@
         unused(c3);
 
   #if T_VALID
-        if (unlikely (!utf8_byte_is_trail (c3))) goto invalid;
+        if (unlikely (!utf8_cunit_is_trail (c3))) goto invalid;
 
         // Compose the UTF-32 codepoint from four UTF-8 bytes
-        u32f w = utf8_char_make4 (c, c1, c2, c3);
+        u32f w = utf8_codep_make4 (c, c1, c2, c3);
   #elif !T_EXPLICIT
         if (unlikely (c3 == '\0')) goto invalid;
   #endif
@@ -217,7 +217,7 @@
         if (unlikely ((w - 0x10000u) > 0xFFFFFu)) goto invalid;
 
         // Check for reserved Unicode character
-        if (unlikely (utf16_char_is_rsrv (w))) goto invalid;
+        if (unlikely (utf16_codep_is_rsrv (w))) goto invalid;
 #endif
 
         i += 4u;

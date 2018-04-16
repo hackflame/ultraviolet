@@ -1,5 +1,5 @@
 // =============================================================================
-// <testsuite/templates/validate.c>
+// <testsuite/utf/validate.c>
 //
 // Copyright Kristian Garnét.
 // -----------------------------------------------------------------------------
@@ -50,7 +50,7 @@
 
     insz *= T_utf_in_sz;
 
-    if (io_file_write (stdout, (T_utf_in_t*)in, insz) != insz) error_io();
+    if (io_stream_write (stdout, (T_utf_in_t*)in, insz) != insz) error_io();
   }
   else insz *= T_utf_in_sz;
 }

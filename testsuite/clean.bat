@@ -7,7 +7,7 @@
 @echo off
 cd /d "%~dp0"
 
-if exist build (
+if exist build\CMakeFiles (
   rmdir /s /q build
 )
 

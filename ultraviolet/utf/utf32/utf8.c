@@ -33,7 +33,7 @@
     register u32f c = *i;
 
     // One ASCII byte
-    if (likely (utf32_char_is_lead1 (c)))
+    if (likely (utf32_codep_is_lead1 (c)))
     {
 #if T_SIZE
       sz++;
@@ -55,7 +55,7 @@
     }
 
     // Two UTF-8 bytes
-    else if (likely (utf32_char_is_lead2 (c)))
+    else if (likely (utf32_codep_is_lead2 (c)))
     {
 #if T_SIZE
       sz += 2u;
@@ -67,25 +67,25 @@
       }
 
       // Compose the 2-byte UTF-8 codepoint
-      o[0] = (u8)utf8_char_get_lead2 (c);
-      o[1] = (u8)utf8_char_get_trail1 (c);
+      o[0] = (u8)utf8_codep_get_lead2 (c);
+      o[1] = (u8)utf8_codep_get_trail1 (c);
 
       o += 2u;
 #endif
     }
 
     // Three UTF-8 bytes
-    else if (likely (utf32_char_is_lead3 (c)))
+    else if (likely (utf32_codep_is_lead3 (c)))
     {
 #if T_VALID
       // Check for UTF-16 surrogate character
-      if (unlikely (utf16_byte_is_surr (c))) goto invalid;
+      if (unlikely (utf16_cunit_is_surr (c))) goto invalid;
 
       // Check for Unicode non-character
-      if (unlikely (utf16_char_is_non (c))) goto invalid;
+      if (unlikely (utf16_codep_is_non (c))) goto invalid;
 
       // Check for reserved Unicode character
-      if (unlikely (utf16_char_is_rsrv (c))) goto invalid;
+      if (unlikely (utf16_codep_is_rsrv (c))) goto invalid;
 #endif
 
 #if T_SIZE
@@ -98,9 +98,9 @@
       }
 
       // Compose the 3-byte UTF-8 codepoint
-      o[0] = (u8)utf8_char_get_lead3 (c);
-      o[1] = (u8)utf8_char_get_trail2 (c);
-      o[2] = (u8)utf8_char_get_trail1 (c);
+      o[0] = (u8)utf8_codep_get_lead3 (c);
+      o[1] = (u8)utf8_codep_get_trail2 (c);
+      o[2] = (u8)utf8_codep_get_trail1 (c);
 
       o += 3u;
 #endif
@@ -108,14 +108,14 @@
 
     // Four UTF-8 bytes
 #if T_VALID
-    else if (unlikely (utf32_char_is_lead4 (c)))
+    else if (unlikely (utf32_codep_is_lead4 (c)))
 #else
     else
 #endif
     {
 #if T_VALID
       // Check for reserved Unicode character
-      if (unlikely (utf16_char_is_rsrv (c))) goto invalid;
+      if (unlikely (utf16_codep_is_rsrv (c))) goto invalid;
 #endif
 
 #if T_SIZE
@@ -128,10 +128,10 @@
       }
 
       // Compose the 4-byte UTF-8 codepoint
-      o[0] = (u8)utf8_char_get_lead4 (c);
-      o[1] = (u8)utf8_char_get_trail3 (c);
-      o[2] = (u8)utf8_char_get_trail2 (c);
-      o[3] = (u8)utf8_char_get_trail1 (c);
+      o[0] = (u8)utf8_codep_get_lead4 (c);
+      o[1] = (u8)utf8_codep_get_trail3 (c);
+      o[2] = (u8)utf8_codep_get_trail2 (c);
+      o[3] = (u8)utf8_codep_get_trail1 (c);
 
       o += 4u;
 #endif

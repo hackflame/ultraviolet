@@ -32,14 +32,14 @@
     register u16f c = *i;
 
     // BMP character
-    if (likely (!utf16_byte_is_surr (c)))
+    if (likely (!utf16_cunit_is_surr (c)))
     {
 #if T_VALID
       // Check for Unicode non-character
-      if (unlikely (utf16_char_is_non (c))) goto invalid;
+      if (unlikely (utf16_codep_is_non (c))) goto invalid;
 
       // Check for reserved Unicode character
-      if (unlikely (utf16_char_is_rsrv (c))) goto invalid;
+      if (unlikely (utf16_codep_is_rsrv (c))) goto invalid;
 #endif
 
 #if T_SIZE
@@ -61,7 +61,7 @@
 
     // Surrogate pair
 #if T_VALID
-    else if (unlikely (utf16_byte_is_surr_high (c)))
+    else if (unlikely (utf16_cunit_is_surr_high (c)))
 #else
     else
 #endif
@@ -76,7 +76,7 @@
 
 #if T_VALID
       // Check if it's actually a low surrogate
-      if (unlikely (!utf16_byte_is_surr_low (cs))) goto invalid;
+      if (unlikely (!utf16_cunit_is_surr_low (cs))) goto invalid;
 #elif !T_EXPLICIT
       // Invalid sequence
       if (unlikely (cs == '\0')) goto invalid;
@@ -90,7 +90,7 @@
       if (unlikely ((w - 0x10000u) > 0xFFFFFu)) goto invalid;
 
       // Check for reserved Unicode character
-      if (unlikely (utf16_char_is_rsrv (w))) goto invalid;
+      if (unlikely (utf16_codep_is_rsrv (w))) goto invalid;
 #endif
 
 #if T_SIZE

@@ -20,10 +20,10 @@ int utf8_str_to16 (const u8* restrict in, size_t len, u16* restrict out
 int utf8_str_to16_fast (const u8* restrict in, size_t len
 , u16* restrict out, size_t size, u8** end, size_t* num);
 
-int utf8_istr_to16 (const u8* restrict in, u16* restrict out, size_t size
+int utf8_zstr_to16 (const u8* restrict in, u16* restrict out, size_t size
 , u8** end, size_t* num);
 
-int utf8_istr_to16_fast (const u8* restrict in, u16* restrict out
+int utf8_zstr_to16_fast (const u8* restrict in, u16* restrict out
 , size_t size, u8** end, size_t* num);
 ```
 

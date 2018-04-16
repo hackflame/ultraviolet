@@ -38,7 +38,7 @@ int utf8_str_runes (const u8* restrict in, size_t len
 
 // -----------------------------------------------------------------------------
 
-int utf8_istr_valid (const u8* restrict in
+int utf8_zstr_valid (const u8* restrict in
 , u8** restrict end, size_t* restrict num)
 {
   #define T_VALID 1
@@ -46,7 +46,7 @@ int utf8_istr_valid (const u8* restrict in
   #include "utf8/utf8.c"
 }
 
-int utf8_istr_runes (const u8* restrict in
+int utf8_zstr_runes (const u8* restrict in
 , u8** restrict end, size_t* restrict num)
 {
   #include "utf8/utf8.c"
@@ -79,7 +79,7 @@ int utf8_str_to16_fast (const u8* restrict in, size_t len
 
 // -----------------------------------------------------------------------------
 
-int utf8_istr_to16 (const u8* restrict in
+int utf8_zstr_to16 (const u8* restrict in
 , u16* restrict out, size_t size
 , u8** restrict end, size_t* restrict num)
 {
@@ -88,7 +88,7 @@ int utf8_istr_to16 (const u8* restrict in
   #include "utf8/utf16.c"
 }
 
-int utf8_istr_to16_fast (const u8* restrict in
+int utf8_zstr_to16_fast (const u8* restrict in
 , u16* restrict out, size_t size
 , u8** restrict end, size_t* restrict num)
 {
@@ -120,7 +120,7 @@ int utf8_str_to32_fast (const u8* restrict in, size_t len
 
 // -----------------------------------------------------------------------------
 
-int utf8_istr_to32 (const u8* restrict in
+int utf8_zstr_to32 (const u8* restrict in
 , u32* restrict out, size_t size
 , u8** restrict end, size_t* restrict num)
 {
@@ -129,7 +129,7 @@ int utf8_istr_to32 (const u8* restrict in
   #include "utf8/utf32.c"
 }
 
-int utf8_istr_to32_fast (const u8* restrict in
+int utf8_zstr_to32_fast (const u8* restrict in
 , u32* restrict out, size_t size
 , u8** restrict end, size_t* restrict num)
 {
